@@ -39,6 +39,7 @@ SOFTWARE.
 if __name__ == '__main__':
     import argparse
     import hashlib
+    import mmh3
     # Print file's docstring if -h is invoked
     parser = argparse.ArgumentParser(description=__doc__, 
                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -60,7 +61,7 @@ if __name__ == '__main__':
                             for k in range(len(covid) - kmer_size + 1)])
             for kmer in kmers:
                 print(kmer, file=fhs[int(
-                                        hashlib.md5(kmer).hexdigest(), 16
+					mmh3.hash(kmer)
                                      ) % args.output_file_count])
         for fh in fhs:
             fh.close()
