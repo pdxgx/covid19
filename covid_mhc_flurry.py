@@ -29,7 +29,7 @@ SOFTWARE.
 
 infile = "covid.pep"
 peplist = [line.rstrip('\n') for line in open(infile)]
-infile = mhcflurry_alleles.txt
+infile = "mhcflurry_alleles.txt"
 allele_list = [line.rstrip('\n') for line in open(infile)]
 
 with open("mhcflurry_input.csv", 'w', newline="") as myfile:
