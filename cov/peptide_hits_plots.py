@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 peptide_hits_plots.py
 
@@ -7,8 +7,8 @@ sequence.
 
 We ran
 
-python peptide_hits_plots.py
-    --fasta /path/to/viral/fasta --kmers /path/to/kmer/csv
+pypy3 peptide_hits_plots.py -f YP_009724389.1.fa -k hla_cleavednugs_filt.csv -o covid19.nugs
+pypy3 peptide_hits_plots.py -f YP_009724389.1.fa -k hla_cleavedflurry_filt.csv -o covid19.flurry
 
 kmer CSV has columns allele, peptide, ic50, less_than_50, occ, but only the
 columns allele and peptide are used.
@@ -44,11 +44,29 @@ if __name__ == '__main__':
 
     from collections import defaultdict
     kmer_sets = defaultdict(set)
+    import csv
     with open(args.kmers) as kmer_stream:
-        kmer_stream.readline() # kill header
-        for line in kmer_stream:
-            allele, kmer = line.split(',')[:2]
-            allele = allele[:5] # just get HLA-A, HLA-B, or HLA-C
+        kmer_reader = csv.reader(kmer_stream)
+        for i, row in enumerate(kmer_reader):
+            if not i:
+                if 'peptide' in row[0] and 'allele' in row[1]:
+                    reverse_order = True
+                elif 'peptide' in row[1] and 'allele' in row[0]:
+                    reverse_order = False
+                else:
+                    raise RuntimeError('Input CSV does not have peptide/allele in '
+                                       'first and second columns')
+            if not reverse_order:
+                allele, kmer = row[:2]
+            else:
+                kmer, allele = row[:2]
+            # just get HLA-A, HLA-B, or HLA-C
+            if 'HLA-A' in allele:
+                allele = 'HLA-A'
+            elif 'HLA-B' in allele:
+                allele = 'HLA-B'
+            elif 'HLA-C' in allele:
+                allele = 'HLA-C'
             kmer_sets[allele].add(kmer)
             kmer_sets['all'].add(kmer)
 
@@ -64,4 +82,3 @@ if __name__ == '__main__':
         with open(args.out + '.' + allele + '.csv', 'w') as cov_stream:
             for i in range(len(cov_dists[allele])):
                 print(cov_dists[allele][i], file=cov_stream)
-
