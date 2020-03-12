@@ -7,8 +7,10 @@ sequence.
 
 We ran
 
-pypy3 peptide_hits_plots.py -f YP_009724389.1.fa -k hla_cleavednugs_filt.csv -o covid19.nugs
-pypy3 peptide_hits_plots.py -f YP_009724389.1.fa -k hla_cleavedflurry_filt.csv -o covid19.flurry
+python3 peptide_hits_plots.py -f YP_009724389.1.fa -k hla_cleavedflurry_filt_50.csv -o covid19.flurry
+python3 peptide_hits_plots.py -f YP_009724389.1.fa -k hla_cleavednugs_filt_50.csv -o covid19.nugs
+python3 peptide_hits_plots.py -f NP_828849.2.fa -k sars_hla_cleavedflurry_filt_50.csv -o sars.flurry
+python3 peptide_hits_plots.py -f NP_828849.2.fa -k sars_hla_cleavednugs_filt_50.csv -o sars.nugs
 
 kmer CSV has columns allele, peptide, ic50, less_than_50, occ, but only the
 columns allele and peptide are used.
