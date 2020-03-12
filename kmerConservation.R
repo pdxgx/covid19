@@ -1,10 +1,10 @@
-kmerConservation <- function(kmer.file, peptide.files) {
+kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 	kmer.data <- read.csv(kmer.file, header=TRUE, as.is=TRUE)
 	kmers <- unique(kmer.data[,"peptide"])
 	kmer.scores <- list()
 	for (peptide.file in peptide.files) {
 		data <- read.csv(peptide.file,header=FALSE,as.is=TRUE,row.names=1)
-		sequences <- unlist(lapply(data[1,],"as.character"))[1:length(data[1,])]
+		sequences <- unlist(lapply(data[seqname,],"as.character"))[1:length(data[seqname,])]
 		peptide <- gsub("[-]","",paste(sequences, collapse=""))
 		ungapped <- which(sequences != "-")
 		matches <- mapply(gregexpr, kmers, peptide)
@@ -21,7 +21,7 @@ kmerConservation <- function(kmer.file, peptide.files) {
 				gaps <- setdiff(min(indices):max(indices), indices)
 				#add scores for each successive amino acid in linear epitope
 				for (k in indices) {
-					if (grepl(data["SARS-CoV-2",k], gsub("[[]?([A-Z]*)[]]? [0-9]*[%]", "\\1", data["Consensus_seq", k]))) {
+					if (grepl(data[seqname,k], gsub("[[]?([A-Z]*)[]]? [0-9]*[%]", "\\1", data["Consensus_seq", k]))) {
 						Q <- Q + as.numeric(data["Quality", k])
 						B <- B + as.numeric(data["Beta-CoV cons", k])
 						H <- H + as.numeric(data["Human-CoV cons", k])
