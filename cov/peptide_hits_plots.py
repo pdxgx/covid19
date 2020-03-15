@@ -19,6 +19,8 @@ Outputs coverage at each position of input peptide for each of HLA-A, HLA-B,
 HLA-C, and all.
 """
 
+import seaborn
+
 if __name__ == '__main__':
     import argparse
     # Print file's docstring if -h is invoked
@@ -35,14 +37,6 @@ if __name__ == '__main__':
         help='output file basename'
         )
     args = parser.parse_args()
-
-
-    viral_seq = []
-    with open(args.fasta) as fasta_stream:
-        fasta_stream.readline() # kill header
-        for line in fasta_stream:
-            viral_seq.append(line.strip())
-    viral_seq = ''.join(viral_seq)
 
     from collections import defaultdict
     kmer_sets = defaultdict(set)
@@ -72,15 +66,31 @@ if __name__ == '__main__':
             kmer_sets[allele].add(kmer)
             kmer_sets['all'].add(kmer)
 
-    cov_dists = defaultdict(lambda: [0 for i in range(len(viral_seq))])
-    for kmer_size in [8, 9, 10, 11, 12]: # NOTE only these kmer sizes work
-        for i in range(len(viral_seq) - kmer_size + 1):
-            for allele in kmer_sets:
-                if viral_seq[i:i+kmer_size] in kmer_sets[allele]:
-                    for j in range(kmer_size):
-                        cov_dists[allele][i+j] += 1
+    with open(args.fasta) as fasta_stream:
+        line = fasta_stream.readline().strip()
+        if not line:
+            raise RuntimeError('First line of FASTA is blank.')
+        while True:
+            assert line.startswith('>')
+            contig = line[1:]
+            viral_seq = []
+            while True:
+                line = fasta_stream.readline().strip()
+                if fasta_stream.startswith('>') or not line:
+                    break
+                viral_seq.append(line.strip())
+            cov_dists = defaultdict(lambda: [0 for i in range(len(viral_seq))])
+            for kmer_size in [8, 9, 10, 11, 12]: # only these kmer sizes work
+                for i in range(len(viral_seq) - kmer_size + 1):
+                    for allele in kmer_sets:
+                        if viral_seq[i:i+kmer_size] in kmer_sets[allele]:
+                            for j in range(kmer_size):
+                                cov_dists[allele][i+j] += 1
 
-    for allele in cov_dists:
-        with open(args.out + '.' + allele + '.csv', 'w') as cov_stream:
-            for i in range(len(cov_dists[allele])):
-                print(cov_dists[allele][i], file=cov_stream)
+            for allele in cov_dists:
+                with open(args.out + '.' + allele + '.csv', 'w') as cov_stream:
+                    for i in range(len(cov_dists[allele])):
+                        print(cov_dists[allele][i], file=cov_stream)
+            if not line:
+                break
+            continue
