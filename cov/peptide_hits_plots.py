@@ -66,6 +66,7 @@ if __name__ == '__main__':
             kmer_sets[allele].add(kmer)
             kmer_sets['all'].add(kmer)
 
+    import seaborn as sns
     with open(args.fasta) as fasta_stream:
         line = fasta_stream.readline().strip()
         if not line:
@@ -76,9 +77,10 @@ if __name__ == '__main__':
             viral_seq = []
             while True:
                 line = fasta_stream.readline().strip()
-                if fasta_stream.startswith('>') or not line:
+                if line.startswith('>') or not line:
                     break
                 viral_seq.append(line.strip())
+            viral_seq = ''.join(viral_seq)
             cov_dists = defaultdict(lambda: [0 for i in range(len(viral_seq))])
             for kmer_size in [8, 9, 10, 11, 12]: # only these kmer sizes work
                 for i in range(len(viral_seq) - kmer_size + 1):
@@ -88,9 +90,14 @@ if __name__ == '__main__':
                                 cov_dists[allele][i+j] += 1
 
             for allele in cov_dists:
-                with open(args.out + '.' + allele + '.csv', 'w') as cov_stream:
+                with open(args.out + '.' + contig + '.' + allele + '.csv',
+                          'w') as cov_stream:
                     for i in range(len(cov_dists[allele])):
                         print(cov_dists[allele][i], file=cov_stream)
+                        sns.barplot(x = 'position', y = 'kmer count',
+                                    data = cov_dists[allele],
+                                    palette = 'hls')
+                        plt.savefig()
             if not line:
                 break
             continue
