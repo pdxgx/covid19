@@ -69,20 +69,23 @@ for (pop in popIDs) {
 	region <- data[which(data[,2]=="Geographic Region:"),3]
 	alleles[which(alleles[,"pop.ID"]==pop), c("lat", "long", "region", "country")] <- list(lat=lat, long=long, region=region, country=country)
 }
-save(alleles,file=alleles.outfile)
 
 #-----------------------
 # aggregate allele data by country (ISO3)
 #-----------------------
-# fix ISO3 code errors (England -> Great Britain)
+# fix ISO3 code match issues (England -> Great Britain, Northern Ireland -> Great Britain, Gaza -> Israel, Romania -> Romania)
 alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
+alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
+alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
+alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
+save(alleles,file=alleles.outfile)
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric())
 #ISO3 <- unique(alleles[,"country"])
 for (ISO3 in unique(alleles[,"country"])) {
 	data <- alleles[which(alleles[,"country"] == ISO3),]
 	for (HLA in unique(as.character(data[,"HLA"]))) {
 		# aggregate codes (A*01:01 will include contributions from e.g. A*01:01:01 and A*01:01:02 in addition to A*01:01 itself)
-		hla.data <- data[grepl(HLA,data[,"HLA"]),c("freq","sample.size")]
+		hla.data <- data[grepl(HLA,data[,"HLA"], fixed=TRUE),c("freq","sample.size")]
 		# alternative approach is to only lump by exact allele match
 		# hla.data <- data[which(data[,"HLA"]==HLA),c("freq","sample.size")]
 		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
@@ -93,31 +96,25 @@ save(hla.iso3,file="hla.iso3.rda")
 #----------
 # plot data
 #----------
-# note this will generate >4,000 plots!!
-#for (HLA in unique(hla.iso3[,"HLA"])) {
-#	sPDF <- joinCountryData2Map(hla.iso3[which(hla.iso3[,"HLA"]==HLA),], joinCode="ISO3", nameJoinColumn="ISO3")
-#  	jpeg(paste0(pdn, "/", 
-#             gsub("\\:", "-", gsub("\\*", "", HLA)), ".jpg"), 
-#       4, 3, units = "in", res = 400)
-#  	mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="gray", borderCol="black", oceanCol
-#="lightblue", catMethod="pretty",addLegend=FALSE, mapTitle=HLA)
-#	do.call( addMapLegend, c(mapParams, legendWidth=0.5, legendMar = 2))
-#  	  dev.off()
-#}
-
 HLAgeoPlot <- function(HLA, outdir=NULL) {
-	sPDF <- joinCountryData2Map(hla.iso3[which(hla.iso3[,"HLA"]==HLA),], joinCode="ISO3", nameJoinColumn="ISO3")
+	data <- hla.iso3[which(hla.iso3[,"HLA"]==HLA),]
+	sPDF <- joinCountryData2Map(data, joinCode="ISO3", nameJoinColumn="ISO3", verbose=TRUE)
 	if (!is.null(outdir)) {
 		dir.create(outdir, showWarnings = FALSE)
-	  	jpeg(paste0(outdir, "/", 
-             gsub("\\:", "-", gsub("\\*", "", HLA)), ".jpg"), 
-    	   4, 3, units = "in", res = 400)
+	  	pdf(paste0(outdir, "/", 
+             gsub("\\:", "-", gsub("\\*", "", HLA)), ".pdf"), 
+    	   width=8, height=6)
 	}
   	mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="gray", 
-  			borderCol="black", oceanCol="lightblue", catMethod="pretty",
+  			borderCol="black", oceanCol="lightblue", catMethod=0:ceiling(max(data[,"freq"])*100)/100,
   			addLegend=FALSE, mapTitle=HLA)
-	do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=2))
+	do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=6.5))
 	if (!is.null(outdir)) {
 		dev.off()
 	}
 }
+
+# note this will generate >4,000 plots!!
+#for (HLA in unique(hla.iso3[,"HLA"])) {
+#	HLAgeoPlot(HLA, outdir="plots")
+#}
