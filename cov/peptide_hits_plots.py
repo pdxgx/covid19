@@ -66,7 +66,10 @@ if __name__ == '__main__':
             kmer_sets[allele].add(kmer)
             kmer_sets['all'].add(kmer)
 
+    import matplotlib.pyplot as plt
     import seaborn as sns
+    sns.set()
+    from pandas import DataFrame
     with open(args.fasta) as fasta_stream:
         line = fasta_stream.readline().strip()
         if not line:
@@ -89,15 +92,35 @@ if __name__ == '__main__':
                             for j in range(kmer_size):
                                 cov_dists[allele][i+j] += 1
 
-            for allele in cov_dists:
+            plt.clf()
+            fig, axes = plt.subplots(
+                                nrows=len(cov_dists), ncols=1,
+                                sharex=True, sharey=True
+                            )
+            plt.setp(axes, xticks=range(0, len(viral_seq), 1000),
+                        yticks=range(0, 50, 5))
+            max_x = len(viral_seq) + 10
+            min_x = -10
+            max_y = max(cov_dists['all']) + 1
+            min_y = -0.2
+            plt.xlim(min_x, max_x)
+            plt.ylim(min_y, max_y)
+            for k, allele in enumerate(['all', 'HLA-A', 'HLA-B', 'HLA-C']):
                 with open(args.out + '.' + contig + '.' + allele + '.csv',
                           'w') as cov_stream:
                     for i in range(len(cov_dists[allele])):
                         print(cov_dists[allele][i], file=cov_stream)
-                        sns.barplot(x = 'position', y = 'kmer count',
-                                    data = cov_dists[allele],
-                                    palette = 'hls')
-                        plt.savefig()
+                axes[k].vlines(x=range(len(viral_seq)),
+                           ymin=0, ymax=cov_dists[allele],
+                           color='orange')
+                axes[k].text(max_x * 0.9, max_y * 1.03, allele)
+            plt.xlabel('position')
+            fig.text(0.015, 0.5, 'kmer count', ha='center', va='center',
+                     rotation='vertical')
+            plt.tight_layout()
+            plt.savefig(
+                    args.out + '.' + contig + '.pdf'
+                )
             if not line:
                 break
             continue
