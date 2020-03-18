@@ -9,10 +9,12 @@
 require(rvest)
 require(rworldmap)
 
+alleles.outfile <- "HLA-freqs.rda"
+iso3.outfile <- "HLA-ISO3-freqs.rda"
+
 #--------------------
 # get allele frequency data
 #--------------------
-alleles.outfile <- "HLA-freqs.rda"
 alleles <- data.frame(HLA=character(), pop.ID=numeric(), pop.name=character(), freq=numeric(), sample.size=numeric())
 for (HLA in LETTERS[1:3]) {
 	page <- 1
@@ -69,16 +71,16 @@ for (pop in popIDs) {
 	region <- data[which(data[,2]=="Geographic Region:"),3]
 	alleles[which(alleles[,"pop.ID"]==pop), c("lat", "long", "region", "country")] <- list(lat=lat, long=long, region=region, country=country)
 }
-
-#-----------------------
-# aggregate allele data by country (ISO3)
-#-----------------------
 # fix ISO3 code match issues (England -> Great Britain, Northern Ireland -> Great Britain, Gaza -> Israel, Romania -> Romania)
 alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
 alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
 alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
 alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
 save(alleles,file=alleles.outfile)
+
+#-----------------------
+# aggregate allele data by country (ISO3)
+#-----------------------
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric())
 #ISO3 <- unique(alleles[,"country"])
 for (ISO3 in unique(alleles[,"country"])) {
@@ -91,7 +93,7 @@ for (ISO3 in unique(alleles[,"country"])) {
 		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
 	}
 }
-save(hla.iso3,file="hla.iso3.rda")
+save(hla.iso3,file=iso3.outfile)
 
 #----------
 # plot data
