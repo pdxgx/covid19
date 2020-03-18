@@ -71,11 +71,21 @@ for (pop in popIDs) {
 	region <- data[which(data[,2]=="Geographic Region:"),3]
 	alleles[which(alleles[,"pop.ID"]==pop), c("lat", "long", "region", "country")] <- list(lat=lat, long=long, region=region, country=country)
 }
-# fix ISO3 code match issues (England -> Great Britain, Northern Ireland -> Great Britain, Gaza -> Israel, Romania -> Romania)
+# fix ISO3 code match issues...
+# England -> Great Britain
 alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
+# Scotland -> Great Britain
+alleles[which(alleles[,"country"]=="SCO"), "country"] <- "GBR"
+# Wales -> Great Britain
+alleles[which(alleles[,"country"]=="WAL"), "country"] <- "GBR"
+# Northern Ireland -> Great Britain
 alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
+# Gaza -> Israel
 alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
+# Romania -> Romania
 alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
+# Iraqi Kurdistan -> Iraq
+alleles[which(alleles[,"country"]=="KUR"), "country"] <- "IRQ"
 save(alleles,file=alleles.outfile)
 
 #-----------------------
