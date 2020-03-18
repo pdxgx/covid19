@@ -105,13 +105,15 @@ HLAgeoPlot <- function(HLA, outdir=NULL) {
              gsub("\\:", "-", gsub("\\*", "", HLA)), ".pdf"), 
     	   width=8, height=6)
 	}
-  	mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="gray", 
-  			borderCol="black", oceanCol="lightblue", catMethod=0:ceiling(max(data[,"freq"])*100)/100,
-  			addLegend=FALSE, mapTitle=HLA)
+  	mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="lightgray", 
+  			borderCol="black", oceanCol="lightblue", mapTitle=HLA,
+  			catMethod=0:ceiling(max(data[,"freq"])*100)/100, addLegend=FALSE)
 	do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=6.5))
 	if (!is.null(outdir)) {
 		dev.off()
 	}
+	# avoid plotting messages (dev.off results) upon function return
+	rm(data)
 }
 
 # note this will generate >4,000 plots!!
