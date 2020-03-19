@@ -1,4 +1,6 @@
-#netcovid
+require(dplyr)
+
+#SARS-CoV-2
 hla_cleavednet <- read.csv("covid_netmhcpan_scores_all_alleles.csv")
 hla_cleavednet_filt <- hla_cleavednet[as.integer(hla_cleavednet$Binding_affinity) < 500,]
 hla_cleavednet_filt$less_than_50 <- ifelse(hla_cleavednet_filt$Binding_affinity<50,'50','500')

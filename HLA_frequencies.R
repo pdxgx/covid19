@@ -50,7 +50,6 @@ for (HLA in LETTERS[1:3]) {
 #--------------------
 # get population data
 #--------------------
-countries <- get(data(countryExData))
 popIDs <- unique(alleles[,"pop.ID"])
 alleles <- cbind(alleles, data.frame(lat=rep(NA, dim(alleles)[1]), long=rep(NA, dim(alleles)[1]), region=rep(NA, dim(alleles)[1]), country=rep(NA, dim(alleles)[1])))
 for (pop in popIDs) {
@@ -79,19 +78,47 @@ alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
 alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
 alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
 save(alleles,file=alleles.outfile)
-hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric())
+countries <- get(data(countryExData))
+hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric(), popsize=numeric())
 #ISO3 <- unique(alleles[,"country"])
 for (ISO3 in unique(alleles[,"country"])) {
 	data <- alleles[which(alleles[,"country"] == ISO3),]
+	switch(ISO3,
+		# 2005 population statistics from https://www.worldometers.info/world-population/
+		MTQ = popsize <- 397.19,
+		SRB = popsize <- 7441,
+		HKG = popsize <- 6813,
+		STP = popsize <- 155.63,
+		SGP = popsize <- 4266,
+		CPV = popsize <- 474.567,
+		LBY = popsize <- 5793,
+		ASM = popsize <- 59.118,
+		NCL = popsize <- 232.25,
+		GNQ = popsize <- 757.317,
+		# Canada HLA data only available for BC First Nations (Athabaskan and Penutian)
+		# Canada First Nations are ~4% of national population 
+		CAN = popsize <- 32268.2 * 0.04,
+		popsize <- countries[which(countries[,1]==ISO3),"Population2005"]
+	)
 	for (HLA in unique(as.character(data[,"HLA"]))) {
 		# aggregate codes (A*01:01 will include contributions from e.g. A*01:01:01 and A*01:01:02 in addition to A*01:01 itself)
 		hla.data <- data[grepl(HLA,data[,"HLA"], fixed=TRUE),c("freq","sample.size")]
 		# alternative approach is to only lump by exact allele match
 		# hla.data <- data[which(data[,"HLA"]==HLA),c("freq","sample.size")]
-		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
+		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2])), popsize=popsize))
 	}
 }
 save(hla.iso3,file="hla.iso3.rda")
+
+#-----------------------
+# estimate global allele frequency
+#-----------------------
+global_allele_freqs <- data.frame(HLA=character(), freq=numeric())
+for (hla in as.character(unique(hla.iso3[,"HLA"]))) {
+	hla.data <- hla.iso3[grepl(hla,hla.iso3[,"HLA"], fixed=TRUE),c("freq","popsize")]
+	global_allele_freqs <- rbind(global_allele_freqs, data.frame(HLA=hla, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
+}
+save(global_allele_freqs, file="global.hla.freqs.rda")
 
 #----------
 # plot data
