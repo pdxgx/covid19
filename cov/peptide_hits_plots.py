@@ -105,14 +105,18 @@ if __name__ == '__main__':
             min_y = -0.2
             plt.xlim(min_x, max_x)
             plt.ylim(min_y, max_y)
-            for k, allele in enumerate(['all', 'HLA-A', 'HLA-B', 'HLA-C']):
+            colors = { 'all' : '#787a64',
+                       'HLA-A' : '#1b9e77',
+                       'HLA-B' : '#d95f02',
+                       'HLA-C' : '#7570B3' }
+            for k, allele in enumerate(colors.keys()):
                 with open(args.out + '.' + contig + '.' + allele + '.csv',
                           'w') as cov_stream:
                     for i in range(len(cov_dists[allele])):
                         print(cov_dists[allele][i], file=cov_stream)
                 axes[k].vlines(x=range(len(viral_seq)),
                            ymin=0, ymax=cov_dists[allele],
-                           color='orange')
+                           color=colors[allele])
                 axes[k].text(max_x * 0.9, max_y * 1.03, allele)
             plt.xlabel('position')
             fig.text(0.015, 0.5, 'kmer count', ha='center', va='center',
