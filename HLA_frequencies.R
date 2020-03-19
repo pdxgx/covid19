@@ -95,6 +95,7 @@ for (ISO3 in unique(alleles[,"country"])) {
 		ASM = popsize <- 59.118,
 		NCL = popsize <- 232.25,
 		GNQ = popsize <- 757.317,
+		TWN = popsize <- 22705.713,
 		# Canada HLA data only available for BC First Nations (Athabaskan and Penutian)
 		# Canada First Nations are ~4% of national population 
 		CAN = popsize <- 32268.2 * 0.04,
