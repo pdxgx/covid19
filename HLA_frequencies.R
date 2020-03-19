@@ -9,12 +9,10 @@
 require(rvest)
 require(rworldmap)
 
-alleles.outfile <- "HLA-freqs.rda"
-iso3.outfile <- "HLA-ISO3-freqs.rda"
-
 #--------------------
 # get allele frequency data
 #--------------------
+alleles.outfile <- "HLA-freqs.rda"
 alleles <- data.frame(HLA=character(), pop.ID=numeric(), pop.name=character(), freq=numeric(), sample.size=numeric())
 for (HLA in LETTERS[1:3]) {
 	page <- 1
@@ -71,26 +69,16 @@ for (pop in popIDs) {
 	region <- data[which(data[,2]=="Geographic Region:"),3]
 	alleles[which(alleles[,"pop.ID"]==pop), c("lat", "long", "region", "country")] <- list(lat=lat, long=long, region=region, country=country)
 }
-# fix ISO3 code match issues...
-# England -> Great Britain
-alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
-# Scotland -> Great Britain
-alleles[which(alleles[,"country"]=="SCO"), "country"] <- "GBR"
-# Wales -> Great Britain
-alleles[which(alleles[,"country"]=="WAL"), "country"] <- "GBR"
-# Northern Ireland -> Great Britain
-alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
-# Gaza -> Israel
-alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
-# Romania -> Romania
-alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
-# Iraqi Kurdistan -> Iraq
-alleles[which(alleles[,"country"]=="KUR"), "country"] <- "IRQ"
-save(alleles,file=alleles.outfile)
 
 #-----------------------
 # aggregate allele data by country (ISO3)
 #-----------------------
+# fix ISO3 code match issues (England -> Great Britain, Northern Ireland -> Great Britain, Gaza -> Israel, Romania -> Romania)
+alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
+alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
+alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
+alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
+save(alleles,file=alleles.outfile)
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric())
 #ISO3 <- unique(alleles[,"country"])
 for (ISO3 in unique(alleles[,"country"])) {
@@ -103,51 +91,32 @@ for (ISO3 in unique(alleles[,"country"])) {
 		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
 	}
 }
-save(hla.iso3,file=iso3.outfile)
+save(hla.iso3,file="hla.iso3.rda")
 
 #----------
-# plot/map data function
+# plot data
 #----------
-HLAgeoPlot <- function(HLA, outdir=NULL,unified.freq=FALSE) {
-	data <- hla.iso3[which(hla.iso3[,"HLA"] %in% HLA),]
-	maxfreq <- ceiling(max(data[,"freq"])*100)
-	for (hla in HLA) {
-		sPDF <- joinCountryData2Map(data[which(data[,"HLA"]==hla),], joinCode="ISO3", nameJoinColumn="ISO3", verbose=TRUE)
-		if (!is.null(outdir)) {
-			dir.create(outdir, showWarnings = FALSE)
-		  	pdf(paste0(outdir, "/", 
-	             gsub("\\:", "-", gsub("\\*", "", hla)), ".pdf"), 
-	    	   width=8, height=6)
-		}
-		if (unified.freq) {
-			freq <- maxfreq
-		}
-		else {
-			freq <- ceiling(max(data[which(data[,"HLA"]==hla),"freq"])*100)
-		}
-		mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="lightgray", 
-	  			borderCol="black", oceanCol="lightblue", mapTitle=hla,
-	  			catMethod=0:freq/100, addLegend=FALSE)
-		do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=6.5))
-		if (!is.null(outdir)) {
-			dev.off()
-		}
+HLAgeoPlot <- function(HLA, outdir=NULL) {
+	data <- hla.iso3[which(hla.iso3[,"HLA"]==HLA),]
+	sPDF <- joinCountryData2Map(data, joinCode="ISO3", nameJoinColumn="ISO3", verbose=TRUE)
+	if (!is.null(outdir)) {
+		dir.create(outdir, showWarnings = FALSE)
+	  	pdf(paste0(outdir, "/", 
+             gsub("\\:", "-", gsub("\\*", "", HLA)), ".pdf"), 
+    	   width=8, height=6)
+	}
+  	mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="lightgray", 
+  			borderCol="black", oceanCol="lightblue", mapTitle=HLA,
+  			catMethod=0:ceiling(max(data[,"freq"])*100)/100, addLegend=FALSE)
+	do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=6.5))
+	if (!is.null(outdir)) {
+		dev.off()
 	}
 	# avoid plotting messages (dev.off results) upon function return
 	rm(data)
 }
 
-#----------
-# generate figures for paper
-#----------
-pdf(file="plots/best+worst_HLA_all_peptides.pdf", width=9,height=8)
-layout(matrix(1:6,nr=3,nc=2))
-par(mar=c(1.1,0.1,1.1,0.1))
-HLAgeoPlot(c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
-dev.off()
-
-pdf(file="plots/best+worst_HLA_conserved_peptides.pdf", width=9,height=8)
-layout(matrix(1:6,nr=3,nc=2))
-par(mar=c(1.1,0.1,1.1,0.1))
-HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
-dev.off()
+# note this will generate >4,000 plots!!
+#for (HLA in unique(hla.iso3[,"HLA"])) {
+#	HLAgeoPlot(HLA, outdir="plots")
+#}
