@@ -45,9 +45,10 @@ if __name__ == '__main__':
         kmer_reader = csv.reader(kmer_stream)
         for i, row in enumerate(kmer_reader):
             if not i:
-                if 'peptide' in row[0] and 'allele' in row[1]:
+                if 'peptide' in row[0].lower() and 'allele' in row[1].lower():
                     reverse_order = True
-                elif 'peptide' in row[1] and 'allele' in row[0]:
+                elif ('peptide' in row[1].lower()
+                      and 'allele' in row[0].lower()):
                     reverse_order = False
                 else:
                     raise RuntimeError('Input CSV does not have peptide/allele in '
@@ -85,6 +86,8 @@ if __name__ == '__main__':
                 viral_seq.append(line.strip())
             viral_seq = ''.join(viral_seq)
             cov_dists = defaultdict(lambda: [0 for i in range(len(viral_seq))])
+            for allele in ['all', 'HLA-A', 'HLA-B', 'HLA-C']:
+                cov_dists[allele][0] = 0
             for kmer_size in [8, 9, 10, 11, 12]: # only these kmer sizes work
                 for i in range(len(viral_seq) - kmer_size + 1):
                     for allele in kmer_sets:
