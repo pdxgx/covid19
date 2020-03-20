@@ -9,10 +9,13 @@
 require(rvest)
 require(rworldmap)
 
+alleles.outfile <- "HLA-freqs.rda"
+iso3.outfile <- "HLA-ISO3-freqs.rda"
+global.outfile <- "HLA-freqs-global.rda"
+
 #--------------------
 # get allele frequency data
 #--------------------
-alleles.outfile <- "HLA-freqs.rda"
 alleles <- data.frame(HLA=character(), pop.ID=numeric(), pop.name=character(), freq=numeric(), sample.size=numeric())
 for (HLA in LETTERS[1:3]) {
 	page <- 1
@@ -70,10 +73,6 @@ for (pop in popIDs) {
 	ethnicity <- data[which(data[,2]=="Ethnic origin:"),3]
 	alleles[which(alleles[,"pop.ID"]==pop), c("lat", "long", "region", "ethnicity", "country")] <- list(lat=lat, long=long, region=region, country=country)
 }
-
-#-----------------------
-# aggregate allele data by country (ISO3)
-#-----------------------
 # fix ISO3 code match issues...
 # England -> Great Britain
 alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
@@ -90,6 +89,10 @@ alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
 # Iraqi Kurdistan -> Iraq
 alleles[which(alleles[,"country"]=="KUR"), "country"] <- "IRQ"
 save(alleles,file=alleles.outfile)
+
+#-----------------------
+# aggregate allele data by country (ISO3)
+#-----------------------
 countries <- get(data(countryExData))
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric(), popsize=numeric())
 #ISO3 <- unique(alleles[,"country"])
@@ -121,7 +124,7 @@ for (ISO3 in unique(alleles[,"country"])) {
 		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2])), popsize=popsize))
 	}
 }
-save(hla.iso3,file="hla.iso3.rda")
+save(hla.iso3,file=iso3.outfile)
 
 #-----------------------
 # estimate global allele frequency
@@ -131,7 +134,7 @@ for (hla in as.character(unique(hla.iso3[,"HLA"]))) {
 	hla.data <- hla.iso3[grepl(hla,hla.iso3[,"HLA"], fixed=TRUE),c("freq","popsize")]
 	global_allele_freqs <- rbind(global_allele_freqs, data.frame(HLA=hla, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
 }
-save(global_allele_freqs, file="global.hla.freqs.rda")
+save(global_allele_freqs, file=global.outfile)
 
 #----------
 # plot/map data function
