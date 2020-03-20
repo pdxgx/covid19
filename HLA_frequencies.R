@@ -74,11 +74,21 @@ for (pop in popIDs) {
 #-----------------------
 # aggregate allele data by country (ISO3)
 #-----------------------
-# fix ISO3 code match issues (England -> Great Britain, Northern Ireland -> Great Britain, Gaza -> Israel, Romania -> Romania)
+# fix ISO3 code match issues...
+# England -> Great Britain
 alleles[which(alleles[,"country"]=="ENG"), "country"] <- "GBR"
+# Scotland -> Great Britain
+alleles[which(alleles[,"country"]=="SCO"), "country"] <- "GBR"
+# Wales -> Great Britain
+alleles[which(alleles[,"country"]=="WAL"), "country"] <- "GBR"
+# Northern Ireland -> Great Britain
 alleles[which(alleles[,"country"]=="NIR"), "country"] <- "GBR"
+# Gaza -> Israel
 alleles[which(alleles[,"country"]=="GAZ"), "country"] <- "ISR"
+# Romania -> Romania
 alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
+# Iraqi Kurdistan -> Iraq
+alleles[which(alleles[,"country"]=="KUR"), "country"] <- "IRQ"
 save(alleles,file=alleles.outfile)
 countries <- get(data(countryExData))
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric(), popsize=numeric())
