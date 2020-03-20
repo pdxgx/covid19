@@ -32,7 +32,7 @@ covid_recode <- hla_cleavednet_filt %>%
 covid_recode$allele <- reorder(covid_recode$allele,covid_recode$allele,FUN=length)
 
 allele_freqs <- as.data.frame(read.csv("allele_freqs.csv", header=TRUE))
-colnames(allele_freqs) <- c("allele", "frequency")
+colnames(allele_freqs) <- c("allele", "frequency", "recalc.freq", "global.freq")
 allele_freqs$class <- ifelse(grepl("A", allele_freqs$allele), 'A', ifelse(grepl("B", allele_freqs$allele), 'B', 'C'))
 allele_freqs$allele <- paste("HLA-", allele_freqs$allele, sep="")
 allele_freqs$allele <- gsub("(\\d{2})(?=\\d{2})", "\\1:", allele_freqs$allele, perl = TRUE)
@@ -40,33 +40,36 @@ allele_freqs_filt <- subset(allele_freqs, allele_freqs$allele %in% hla_cleavedne
 
 new_allele_df <- as.data.frame(table(covid_recode$allele))
 colnames(new_allele_df)[1] <- "allele"
+new_allele_df <- new_allele_df[new_allele_df$allele %in% covid_recode$allele,]
 merged_allele_df <- merge(new_allele_df, allele_freqs_filt, by="allele", all=TRUE)
 merged_allele_df <- merged_allele_df[merged_allele_df$Freq>0,]
+merged_allele_df <- merged_allele_df[order(merged_allele_df$Freq),]
+
+HLA.labels <- sub(pattern="HLA[-]([A-C])",replacement="\\1*", merged_allele_df$allele)
+HLA.labels[which(!HLA.labels %in% c("B*46:01","A*02:02","B*15:03","C*12:03","A*25:01","C*01:02"))] <- ""
 
 a <- ggplot(covid_recode, aes(x = allele, y = occ, fill = class, alpha = as.integer(less_than_50)))+ 
   geom_bar(position="stack", stat="identity")+
   theme_classic()+
   ylab("")+
-  xlab("HLA alleles")+
   scale_fill_manual(values=c('#1B9E77', '#D95F02', '#7570B3'),name = "Gene", labels = c("HLA-A", "HLA-B", "HLA-C"))+
   coord_flip()+
   ggtitle("SARS-CoV-2 Presentation")+
   scale_y_discrete(expand=c(0,0))+
-  scale_alpha(range = c(0.5, 1), guide = FALSE)+
-  theme(axis.ticks = element_line(size = .2), text = element_text(size=20), axis.text.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
+  scale_alpha(range = c(0.25, 1), guide = FALSE)+
+  theme(axis.ticks = element_line(size = .2), text = element_text(size=20), axis.text.y=element_blank(), axis.title.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
 
-b <- ggplot(merged_allele_df, aes(x = reorder(allele,Freq), y = as.numeric(as.character(frequency)), fill = class))+
-  geom_bar(position="stack", stat="identity")+
-  theme_classic() + scale_x_discrete(position='top')+
-  theme(axis.title.y=element_blank(), axis.text.y=element_blank())+
+b <- ggplot(merged_allele_df, aes(x = allele, y = as.numeric(as.character(global.freq)), fill = class))+
+  geom_bar(position="dodge", stat="identity")+
+  theme_classic()+
+  scale_x_discrete(position="top", labels=HLA.labels)+
   ylab("Global allele frequency")+
   scale_fill_manual(values=c('#1B9E77', '#D95F02', '#7570B3'))+
   coord_flip()+
-  #ggtitle("Global allele frequency")+
   scale_y_reverse(expand=(c(0,0)))+
-  scale_alpha(range = c(0.5, 1), guide = FALSE)+
+  scale_alpha(range = c(0.25, 1), guide = FALSE)+
   theme(legend.position = "none")+
-  theme(axis.ticks = element_line(size = .2), text = element_text(size=20),panel.border=element_rect(colour="black", fill=NA, size=1))
+  theme(axis.ticks = element_line(size = .2), text = element_text(size=20),axis.title.y=element_blank(),axis.text.y=element_text(size=8),panel.border=element_rect(colour="black", fill=NA, size=1))
 
 #grid.arrange(b,a, ncol=2)
 gA <- ggplotGrob(a)
@@ -87,34 +90,36 @@ sars_recode$allele <- reorder(sars_recode$allele,sars_recode$allele,FUN=length)
 
 new_allele_df <- as.data.frame(table(sars_recode$allele))
 colnames(new_allele_df)[1] <- "allele"
+new_allele_df <- new_allele_df[new_allele_df$allele %in% sars_recode$allele,]
 merged_allele_df <- merge(new_allele_df, allele_freqs_filt, by="allele", all=TRUE)
 merged_allele_df <- merged_allele_df[merged_allele_df$Freq>0,]
+merged_allele_df <- merged_allele_df[order(merged_allele_df$Freq),]
 
+HLA.labels <- sub(pattern="HLA[-]([A-C])",replacement="\\1*", merged_allele_df$allele)
+HLA.labels[which(!HLA.labels %in% c("B*46:01","A*02:02","B*15:03","C*12:03","A*25:01","C*04:01"))] <- ""
 
 a <- ggplot(sars_recode, aes(x = allele, y = occ, fill = class, alpha = as.integer(less_than_50)))+ 
   geom_bar(position="stack", stat="identity")+
   theme_classic()+
   ylab("")+
-  xlab("HLA alleles")+
   scale_fill_manual(values=c('#1B9E77', '#D95F02', '#7570B3'),name = "Gene", labels = c("HLA-A", "HLA-B", "HLA-C"))+
   coord_flip()+
   ggtitle("SARS-CoV Presentation")+
   scale_y_discrete(expand=c(0,0))+
-  scale_alpha(range = c(0.5, 1), guide = FALSE)+
-  theme(axis.ticks = element_line(size = .2), text = element_text(size=20), axis.text.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
+  scale_alpha(range = c(0.25, 1), guide = FALSE)+
+  theme(axis.ticks = element_line(size = .2), text = element_text(size=20), axis.text.y=element_blank(), axis.title.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
 
-b <- ggplot(merged_allele_df, aes(x = reorder(allele,Freq), y = as.numeric(as.character(frequency)), fill = class))+
-  geom_bar(position="stack", stat="identity")+
-  theme_classic() + scale_x_discrete(position='top')+
-  theme(axis.title.y=element_blank(), axis.text.y=element_blank())+
+b <- ggplot(merged_allele_df, aes(x = allele, y = as.numeric(as.character(global.freq)), fill = class))+
+  geom_bar(position="dodge", stat="identity")+
+  theme_classic()+
+  scale_x_discrete(position="top", labels=HLA.labels)+
   ylab("Global allele frequency")+
   scale_fill_manual(values=c('#1B9E77', '#D95F02', '#7570B3'))+
   coord_flip()+
-  #ggtitle("Global allele frequency")+
   scale_y_reverse(expand=(c(0,0)))+
-  scale_alpha(range = c(0.5, 1), guide = FALSE)+
+  scale_alpha(range = c(1, 0.25), guide = FALSE)+
   theme(legend.position = "none")+
-  theme(axis.ticks = element_line(size = .2), text = element_text(size=20),panel.border=element_rect(colour="black", fill=NA, size=1))
+  theme(axis.ticks = element_line(size = .2), text = element_text(size=20),axis.title.y=element_blank(),axis.text.y=element_text(size=8),panel.border=element_rect(colour="black", fill=NA, size=1))
 
 #grid.arrange(b,a, ncol=2)
 gA <- ggplotGrob(a)
