@@ -93,6 +93,9 @@ save(alleles,file=alleles.outfile)
 #-----------------------
 # aggregate allele data by country (ISO3)
 #-----------------------
+# FUTURE DEVELOPMENT: first summarize allele frequency by ethnic population, THEN collapse to country level based on ethnic frequency in population
+# --> will achieve more accurate population-level estimates because some small ethnic groups are otherwise over-represented in individual countries, e.g. Aboriginal data is >>20% of HLA info for Australia, but they are only ~3% of country's population
+# UN-level data with relative size of ethnic populations in each country: http://data.un.org/Data.aspx?d=POP&f=tableCode:26
 countries <- get(data(countryExData))
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric(), popsize=numeric())
 #ISO3 <- unique(alleles[,"country"])
@@ -158,26 +161,24 @@ HLAgeoPlot <- function(HLA, outdir=NULL,unified.freq=FALSE) {
 		}
 		mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="lightgray", 
 	  			borderCol="black", oceanCol="lightblue", catMethod=0:freq/100, addLegend=FALSE,
-	  			mapTitle=paste0(HLA," (~", format(global_allele_freqs[which(global_allele_freqs[,1]==hla),2]*100, digits=3),"%)"))
+	  			mapTitle=paste0(hla,"\n(~", format(global_allele_freqs[which(global_allele_freqs[,1]==hla),2]*100, digits=2),"% globally)"))
 		do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=6.5))
 		if (!is.null(outdir)) {
 			dev.off()
 		}
 	}
-	# avoid plotting messages (dev.off results) upon function return
-	rm(data)
 }
 #----------
 # generate figures for paper
 #----------
-pdf(file="plots/best+worst_HLA_all_peptides.pdf", width=9,height=8)
+pdf(file="plots/best+worst_HLA_all_peptides.pdf", width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2))
-par(mar=c(1.1,0.1,1.1,0.1))
+par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
-pdf(file="plots/best+worst_HLA_conserved_peptides.pdf", width=9,height=8)
+pdf(file="plots/best+worst_HLA_conserved_peptides.pdf", width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2))
-par(mar=c(1.1,0.1,1.1,0.1))
+par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
