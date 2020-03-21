@@ -12,7 +12,7 @@ require(rworldmap)
 alleles.outfile <- "HLA-freqs.rda"
 iso3.outfile <- "HLA-ISO3-freqs.rda"
 global.outfile <- "HLA-freqs-global.rda"
-MHCpan.alleles.infile <- "netmhcpan_allele_list.txt"
+MHC.alleles.infile <- "supporting_data/netmhcpan_allele_list.txt"
 plotdir <- "plots"
 
 #--------------------
@@ -173,7 +173,7 @@ HLAgeoPlot <- function(HLA, outdir=NULL,unified.freq=FALSE) {
 #----------
 # generate figures for paper
 #----------
-MHCpan_alleles <- as.character(unlist(read.csv(MHCpan.alleles.infile, header=TRUE))) %>%
+MHC_alleles <- as.character(unlist(read.csv(MHC.alleles.infile, header=TRUE))) %>%
 	sub(pattern="HLA[-]([A-C])",replacement="\\1*")
 
 # Figure XXX
@@ -191,6 +191,6 @@ HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
 # Appendix XXX
-for (HLA in MHCpan_alleles) {
+for (HLA in MHC_alleles) {
 	HLAgeoPlot(HLA, outdir=plotdir)
 }
