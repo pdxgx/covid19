@@ -176,21 +176,21 @@ HLAgeoPlot <- function(HLA, outdir=NULL,unified.freq=FALSE) {
 MHC_alleles <- as.character(unlist(read.csv(MHC.alleles.infile, header=TRUE))) %>%
 	sub(pattern="HLA[-]([A-C])",replacement="\\1*")
 
-# Figure XXX
+# Figure 5
 pdf(file=paste0(plotdir, "/best+worst_HLA_all_peptides.pdf"), width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2))
 par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
-# Supplementary Figure XXX
+# Supplementary Figure S1
 pdf(file=paste0(plotdir, "/best+worst_HLA_conserved_peptides.pdf"), width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2))
 par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
-# Appendix XXX
+# Appendix 2
 for (HLA in MHC_alleles) {
 	HLAgeoPlot(HLA, outdir=plotdir)
 }
