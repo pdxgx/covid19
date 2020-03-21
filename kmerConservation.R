@@ -1,5 +1,5 @@
 kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
-	kmer.data <- read.csv(kmer.file, header=TRUE, as.is=TRUE)
+	kmer.data <- read.csv(kmer.file, header=TRUE, as.is=TRUE, comment.char="#")
 	kmers <- unique(kmer.data[,"peptide"])
 	kmer.scores <- list()
 	for (peptide.file in peptide.files) {
@@ -64,3 +64,11 @@ kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 	}
 	return(kmer.data)
 }
+
+
+#----------
+# generate figures for paper
+#----------
+# Supplementary Figure XXX
+peptide.files <- dir("alignments", pattern=".csv", full.names=TRUE)
+data <- kmerConservation("covid_netmhcpan_scores_all_alleles.csv", peptide.files)
