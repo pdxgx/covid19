@@ -11,6 +11,13 @@ We ran `R` scripts with [`R` v3.6.2](https://ftp.osuosl.org/pub/cran/src/base/R-
 * `rworldmap` (v1.3-6)
 * `ggplot2` (v3.3.0)
 
+*Python and python packages:*
+
+We ran python scripts with python 2?.7?.XX??, installed using [Anaconda](https://www.anaconda.com/distribution/). We made use of the following python packages, installable with `pip`:
+
+for example...
+* [`biopython` v1.75](https://github.com/biopython/biopython)
+
 ## Data
 
 *SARS-CoV2 and other coronavirus protein sequences*
