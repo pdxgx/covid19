@@ -22,7 +22,7 @@ for example...
 
 *SARS-CoV2 and other coronavirus protein sequences*
 
-We downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M) protein, envelope (E) protein, and nucleocapsid (N) protein sequence FASTA files for the following 34 coronavirus species from the [National Center of Biotechnology Information (NCBI) Reference Sequence Database](https://www.ncbi.nlm.nih.gov/refseq/). Note that for [SARS-CoV-2](https://www.ncbi.nlm.nih.gov/genome/?term=txid2697049) and [SARS-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid694009) we downloaded FASTA files for all additional annotated protein sequences comprising their full viral proteomes:
+We manually downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M) protein, envelope (E) protein, and nucleocapsid (N) protein sequence FASTA files for the following 34 coronavirus species from the [National Center of Biotechnology Information (NCBI) Reference Sequence Database](https://www.ncbi.nlm.nih.gov/refseq/). Note that for [SARS-CoV-2](https://www.ncbi.nlm.nih.gov/genome/?term=txid2697049) and [SARS-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid694009) we downloaded FASTA files for all additional annotated protein sequences comprising their full viral proteomes:
 
 
 | Name | ORF1ab | Spike | Envelope | Membrane | Nucleocapsid |
@@ -64,9 +64,8 @@ We downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M)
 
 *HLA frequency data*
 
-Allele search in allelefrequencies.com
+We designed and executed a custom `R` script (`HLA_frequencies.R`) to scrape all population and human leukocyte antigen (HLA) allele frequency from the [Allele Frequency Net Database](http://www.allelefrequencies.net/).
 
-We scraped population and allele frequency data from allelefrequency.com. We used the `rvest` R package to parse the scraped html code, and the `rglobalmaps`.
 
 ## Statistical analysis and figure generation
 
