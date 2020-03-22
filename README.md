@@ -15,16 +15,13 @@ We ran `R` scripts with [`R` v3.6.2](https://ftp.osuosl.org/pub/cran/src/base/R-
 
 *SARS-CoV2 and other coronavirus protein sequences*
 
-We downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M) protein, envelope (E) protein, and nucleocapsid (N) protein sequence FASTA files for the following 34 coronavirus species from the [National Center of Biotechnology Information (NCBI) Reference Sequence Database](https://www.ncbi.nlm.nih.gov/refseq/):
+We downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M) protein, envelope (E) protein, and nucleocapsid (N) protein sequence FASTA files for the following 34 coronavirus species from the [National Center of Biotechnology Information (NCBI) Reference Sequence Database](https://www.ncbi.nlm.nih.gov/refseq/). Note that for [SARS-CoV-2](https://www.ncbi.nlm.nih.gov/genome/?term=txid2697049) and [SARS-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid694009) we downloaded FASTA files for all additional annotated protein sequences comprising their full viral proteomes:
 
-
-1. [SARS-CoV-2]()
-2. [SARS-CoV]
 
 | Name | ORF1ab | Spike | Envelope | Membrane | Nucleocapsid |
 | ---- | ------ | ----- | -------- | -------- | ------------ |
-| [SARS-CoV-2](https://www.ncbi.nlm.nih.gov/genome/?term=txid2697049) |	YP_009724389.1 | YP_009724390.1 | YP_009724392.1 | YP_009724393.1 | YP_009724397.2 |
-| [SARS-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid694009) | NP_828849.2 | NP_828851.1 | NP_828854.1 | NP_828855.1 | NP_828858.1 |
+| [SARS-CoV-2\*](https://www.ncbi.nlm.nih.gov/genome/?term=txid2697049) |	YP_009724389.1 | YP_009724390.1 | YP_009724392.1 | YP_009724393.1 | YP_009724397.2 |
+| [SARS-CoV\*](https://www.ncbi.nlm.nih.gov/genome/?term=txid694009) | NP_828849.2 | NP_828851.1 | NP_828854.1 | NP_828855.1 | NP_828858.1 |
 | [OC43](https://www.ncbi.nlm.nih.gov/genome/?term=txid31631) | YP_009555238.1 | YP_009555241.1 | YP_009555243.1 | YP_009555244.1 | YP_009555245.1 |
 | [Bovine-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid11128) | NP_150073.2 | NP_150077.1 | NP_150081.1 | NP_150082.1 | NP_150083.1 |
 | [HKU24](https://www.ncbi.nlm.nih.gov/genome/?term=txid2501960) | YP_009113022.1 | YP_009113025.1 | YP_009113028.1 | YP_009113029.1 | YP_009113031.1 |
@@ -33,7 +30,7 @@ We downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M)
 | [Rat-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid31632) | YP_003029844.1 | YP_003029848.1 | YP_003029850.1 | YP_003029851.1 | YP_003029852.1 |
 | [Bat-BCoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid2501961) | YP_009072438.1 | YP_009072440.1 | YP_009072442.1 | YP_009072443.1 | YP_009072446.1 |
 | [Hedgehog-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid1965093) | YP_009513008.1 | YP_009513010.1 | YP_009513016.1 | YP_009513017.1 | YP_009513018.1 |
-| [MERS-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid1335626) | YP_009047202.1 | YP_009047204.1 | YP_009047209.1 | YP_009047210.1 | YP_009047211 |
+| [MERS-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid1335626) | YP_009047202.1 | YP_009047204.1 | YP_009047209.1 | YP_009047210.1 | YP_009047211.1 |
 | [HKU4](https://www.ncbi.nlm.nih.gov/genome/?term=txid694007) | YP_001039952.1 | YP_001039953.1 | YP_001039958.1 | YP_001039959.1 | YP_001039960.1 |
 | [HKU5](https://www.ncbi.nlm.nih.gov/genome/?term=txid694008) | YP_001039961.1 | YP_001039962.1 | YP_001039967.1 | YP_001039968.1 | YP_001039969.1 |
 | [GCCDC1](https://www.ncbi.nlm.nih.gov/genome/?term=txid2501962) | YP_009273004.1 | YP_009273005.1 | YP_009273007.1 | YP_009273008.1 | YP_009273009.1 |
@@ -58,10 +55,11 @@ We downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M)
 | [FCoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid12663) | YP_004070193.2 | YP_004070194.1 | YP_004070197.1 | YP_004070198.1 | YP_004070199.1 |
 | [TGE](https://www.ncbi.nlm.nih.gov/genome/?term=txid11149) | NP_058422.1 | NP_058424.1 | NP_058426.1 | NP_058427.2 | NP_058428.1 |
 
-Full polyprotein 1ab (ORF1ab), spike (S) protein, membrane (M) protein, envelope (E) protein, and nucleocapsid (N) protein sequences were obtained for each of 34 distinct but representative alpha and betacoronaviruses from a broad genus and subgenus distribution, including all known human coronaviruses (i.e. SARS-CoV, SARS-CoV-2, MERS-CoV, HKU1, OC43, NL63, and 229E). FASTA-formatted protein sequence data (full accession number list available in Supplementary Table S4) was retrieved from the National Center of Biotechnology Information (NCBI).
-
 *HLA frequency data*
 
 Allele search in allelefrequencies.com
 
 We scraped population and allele frequency data from allelefrequency.com. We used the `rvest` R package to parse the scraped html code, and the `rglobalmaps`.
+
+## Statistical analysis and figure generation
+
