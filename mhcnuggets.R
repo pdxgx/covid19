@@ -15,6 +15,8 @@ hla_cleavednuggets_filt$allele <- gsub(".out", "", hla_cleavednuggets_filt$allel
 hla_cleavednuggets_filt$class <- rep(1,nrow(hla_cleavednuggets_filt))
 hla_cleavednuggets_filt$class <- ifelse(grepl("LA-A", hla_cleavednuggets_filt$allele), 'A', ifelse(grepl("LA-B", hla_cleavednuggets_filt$allele), 'B', 'C'))
 
+write.csv(hla_cleavednuggets_filt,"covid_nuggets_500.csv", row.names=FALSE)
+
 
 #netsars
 sars_hla_cleavednuggets <- read.csv("sars_mhcnuggets.csv")
@@ -29,6 +31,8 @@ sars_hla_cleavednuggets_filt$class <- rep(1,nrow(sars_hla_cleavednuggets_filt))
 sars_hla_cleavednuggets_filt$class <- ifelse(grepl("LA-A", sars_hla_cleavednuggets_filt$allele), 'A', ifelse(grepl("LA-B", sars_hla_cleavednuggets_filt$allele), 'B', 'C'))
 sars_hla_cleavednuggets_filt$allele <- gsub("sars_clean.pep_H", "H", sars_hla_cleavednuggets_filt$allele)
 sars_hla_cleavednuggets_filt$allele <- gsub(".out", "", sars_hla_cleavednuggets_filt$allele)
+
+write.csv(sars_hla_cleavednuggets_filt,"sars_nuggets_500.csv", row.names=FALSE)
 
 
 #plotting
