@@ -69,7 +69,7 @@ We designed and executed a custom `R` script (`HLA_frequencies.R`) to scrape all
 
 ## Data analysis
 
-* Protein sequence alignments *
+*Protein sequence alignments*
 
 For each protein class (i.e. ORF1ab, S, M, E, N), all 34 coronavirus sequences were aligned using the web-based [`Clustal Omega` v1.2.4](https://www.ebi.ac.uk/Tools/msa/clustalo/) multisequence aligner tool employing default parameters: sequence type [Protein], output alignment format [clustal_num], dealign [false], mBed-like clustering guide-tree [true], mBed-like clustering iteration [true], number of combined iterations [0], maximum guide tree iterations [-1], and maximum HMM iterations [-1].
 
