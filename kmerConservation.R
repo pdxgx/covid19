@@ -1,6 +1,6 @@
 kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 	kmer.data <- read.csv(kmer.file, header=TRUE, as.is=TRUE, comment.char="#")
-	kmers <- unique(kmer.data[,"peptide"])
+	kmers <- unique(kmer.data[,"Peptide"])
 	kmer.scores <- new.env(hash=TRUE)
 	for (peptide.file in peptide.files) {
 		data <- read.csv(peptide.file,header=FALSE,as.is=TRUE,row.names=1)
@@ -8,12 +8,11 @@ kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 		peptide <- gsub("[-]","",paste(sequences, collapse=""))
 		ungapped <- which(sequences != "-")
 		matches <- mapply(gregexpr, kmers, peptide)
+		names(matches) <- kmers
 		for (kmer in kmers) {
 			kmer.matches <- matches[[kmer]] 
-			if (any(kmer.matches < 0)) {
-				next
-			}
-			N <- length(kmer.matches)		
+			if (any(kmer.matches < 0)) { next }
+			N <- length(kmer.matches)	
 			Qscore <- Bcons <- Hcons <- Cons <- 0
 			for (j in 1:N) {
 				Q <- B <- H <- C <- 0
@@ -55,15 +54,21 @@ kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 			}
 		}
 	}
-	kmer.data <- cbind(kmer.data, matrix(nr=dim(kmer.data)[1], ncol=4, dimnames=list(c(), c("quality", "conservation.beta", "conservation.human", "conservation.combined"))))
-	for (k in 1:(dim(kmer.data)[1])) {
-		scores <- kmer.scores[[kmer.data[k, "peptide"]]]
-		if (is.null(scores)) { next }
-		kmer.data[k, "quality"] <- max(scores[["quality"]])
-		kmer.data[k, "conservation.beta"] <- max(scores[["conservation.beta"]])
-		kmer.data[k, "conservation.human"] <- max(scores[["conservation.human"]])
-		kmer.data[k, "conservation.combined"] <- max(scores[["conservation.combined"]])
-	}
+	kmer.data <- t(apply(kmer.data, 1, function (x) {
+			scores <- kmer.scores[[x["Peptide"]]]
+			if (is.null(scores)) { return(c(x, rep(NA, 4))) }
+			return(c(x, max(scores[["quality"]]),
+					max(scores[["conservation.beta"]]),
+					max(scores[["conservation.human"]]),
+					max(scores[["conservation.combined"]])))	
+		}))
+	colnames(kmer.data)[ncol(kmer.data)-3:0] <- c("quality", "conservation.beta", "conservation.human", "conservation.combined")
+	kmer.data <- as.data.frame(kmer.data)
+	kmer.data$Binding_affinity <- as.numeric(as.character(kmer.data$Binding_affinity))
+	kmer.data$quality <- as.numeric(as.character(kmer.data$quality))
+	kmer.data$conservation.beta <- as.numeric(as.character(kmer.data$conservation.beta))
+	kmer.data$conservation.human <- as.numeric(as.character(kmer.data$conservation.human))
+	kmer.data$conservation.combined <- as.numeric(as.character(kmer.data$conservation.combined))
 	return(kmer.data)
 }
 
@@ -71,6 +76,16 @@ kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 #----------
 # generate figures for paper
 #----------
-# Supplementary Figure XXX
+# Supplementary Figure S2
 peptide.files <- dir("alignments", pattern=".csv", full.names=TRUE)
-data <- kmerConservation("covid_netmhcpan_scores_all_alleles.csv", peptide.files)
+data <- kmerConservation("Appendix_4.csv", peptide.files)
+cor.test(data$Binding_affinity, data$quality) # -0.01748769 
+cor.test(data$Binding_affinity, data$conservation.combined) # -0.02822426 
+# group by individual peptide (summarize as best binding affinity across all HLA types)
+data.min <- aggregate(data[,c("Binding_affinity","quality","conservation.combined")],by=list(data[,"Peptide"]),FUN=min)
+plot(data.min$Binding_affinity, data.min$quality,pch=20, cex=0.25,xlab="Best peptide-HLA binding affinity (nM)",ylab="Peptide conservation (alignment quality)")
+#plot(data.min$Binding_affinity, data.min$conservation.combined,pch=20, cex=0.25,xlab="Best peptide-HLA binding affinity (nM)",ylab="Peptide conservation (BLOSUM62-based)")
+# group by individual peptide (summarize as median binding affinity across all HLA types)
+#data.med <- aggregate(data[,c("Binding_affinity","quality","conservation.combined")],by=list(data[,"Peptide"]),FUN=median)
+#plot(data.med$Binding_affinity, data.med$quality,pch=20, cex=0.25,xlab="Median peptide-HLA binding affinity (nM)",ylab="Peptide conservation (alignment quality)")
+#plot(data.med$Binding_affinity, data.med$conservation.combined,pch=20, cex=0.25,xlab="Median peptide-HLA binding affinity (nM)",ylab="Peptide conservation (BLOSUM62-based)")
