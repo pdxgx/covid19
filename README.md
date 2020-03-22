@@ -50,7 +50,7 @@ We manually downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, mem
 | [LuchengRn-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid1508224) | YP_009336483.1 | YP_009336484.1 | YP_009336485.1 | YP_009336486.1 | YP_009336487.1 |
 | [Ferret-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid1264898) | YP_009256195.1 | YP_009256197.1 | YP_009256199.1 | YP_009256200.1 | YP_009256201.1 |
 | [Mink-CoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid1913642) | YP_009019180.1 | YP_009019182.1 | YP_009019184.1 | YP_009019185.1 | YP_009019186.1 |
-| [Bat-CoV-1A](https://www.ncbi.nlm.nih.gov/genome/?term=txid694000) | YP_001718603.1 | YP_001718605.1 | YP_001718607.1 | YP_001718608.1 | YP_001718609. |
+| [Bat-CoV-1A](https://www.ncbi.nlm.nih.gov/genome/?term=txid694000) | YP_001718603.1 | YP_001718605.1 | YP_001718607.1 | YP_001718608.1 | YP_001718609.1 |
 | [HKU8](https://www.ncbi.nlm.nih.gov/genome/?term=txid694001) | YP_001718610.1 | YP_001718612.1 | YP_001718614.1 | YP_001718615.1 | YP_001718616.1 |
 | [BtMr-AlphaCoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid2501927) | YP_009199608.1 | YP_009199609.1 | YP_009199611.1 | YP_009199612.1 | YP_009199613.1 |
 | [BtNv-AlphaCoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid2501928) | YP_009201729.1 | YP_009201730.1 | YP_009201732.1 | YP_009201733.1 | YP_009201734.1 |
@@ -71,5 +71,5 @@ We designed and executed a custom `R` script (`HLA_frequencies.R`) to scrape all
 
 *Protein sequence alignments*
 
-For each protein class (i.e. ORF1ab, S, M, E, N), all 34 coronavirus sequences were aligned using the web-based [`Clustal Omega` v1.2.4](https://www.ebi.ac.uk/Tools/msa/clustalo/) multisequence aligner tool employing default parameters: sequence type [Protein], output alignment format [clustal_num], dealign [false], mBed-like clustering guide-tree [true], mBed-like clustering iteration [true], number of combined iterations [0], maximum guide tree iterations [-1], and maximum HMM iterations [-1].
+For each protein class (i.e. ORF1ab, S, M, E, N), all 34 coronavirus sequences were aligned using the web-based [`Clustal Omega`](https://www.ebi.ac.uk/Tools/msa/clustalo/) multisequence aligner tool employing default parameters: sequence type [Protein], output alignment format [clustal_num], dealign [false], mBed-like clustering guide-tree [true], mBed-like clustering iteration [true], number of combined iterations [0], maximum guide tree iterations [-1], and maximum HMM iterations [-1].
 
