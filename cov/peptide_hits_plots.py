@@ -181,6 +181,7 @@ if __name__ == '__main__':
         axes[k].vlines(x=range(len(all_cov_dists['All'])),
                        ymin=0, ymax=all_cov_dists[allele],
                        color=colors[allele])
+    # hlines for diagramming regions
     fig.text(0.015, 0.5, 'Kmer count', ha='center', va='center',
              rotation='vertical')
     plt.tight_layout()
@@ -188,3 +189,21 @@ if __name__ == '__main__':
     plt.savefig(
             args.out + '.pdf'
         )
+
+    plt.clf()
+    # Make separate figure with "legend" for positions
+    fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+    plt.setp(ax, xticks=range(0, len(all_cov_dists['All']), 2000),
+                )
+    plt.xlim(min_x, max_x)
+    import numpy as np
+    bounds = [0] + list(np.cumsum([len(cov_dists_all[k]['All'])
+                        for k in range(len(cov_dists_all))]))
+    for i in range(len(bounds) - 1):
+        ax.hlines(i, bounds[i], bounds[i+1], lw=24,
+                  color='black')
+    fig.text(bounds[0] + 14, 30, '< ' + name_order[0])
+    plt.yticks([], [])
+    plt.xlabel('Position')
+    plt.tight_layout()
+    plt.savefig(args.out + '.boxes.pdf')
