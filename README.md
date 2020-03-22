@@ -62,10 +62,14 @@ We manually downloaded the full polyprotein 1ab (ORF1ab), spike (S) protein, mem
 | [FCoV](https://www.ncbi.nlm.nih.gov/genome/?term=txid12663) | YP_004070193.2 | YP_004070194.1 | YP_004070197.1 | YP_004070198.1 | YP_004070199.1 |
 | [TGE](https://www.ncbi.nlm.nih.gov/genome/?term=txid11149) | NP_058422.1 | NP_058424.1 | NP_058426.1 | NP_058427.2 | NP_058428.1 |
 
-*HLA frequency data*
+*HLA allele frequency data*
 
 We designed and executed a custom `R` script (`HLA_frequencies.R`) to scrape all population and human leukocyte antigen (HLA) allele frequency from the [Allele Frequency Net Database](http://www.allelefrequencies.net/).
 
 
-## Statistical analysis and figure generation
+## Data analysis
+
+* Protein sequence alignments *
+
+For each protein class (i.e. ORF1ab, S, M, E, N), all 34 coronavirus sequences were aligned using the web-based [`Clustal Omega` v1.2.4](https://www.ebi.ac.uk/Tools/msa/clustalo/) multisequence aligner tool employing default parameters: sequence type [Protein], output alignment format [clustal_num], dealign [false], mBed-like clustering guide-tree [true], mBed-like clustering iteration [true], number of combined iterations [0], maximum guide tree iterations [-1], and maximum HMM iterations [-1].
 
