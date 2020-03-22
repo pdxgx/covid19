@@ -1,7 +1,7 @@
 kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
-	kmer.data <- read.csv(kmer.file, header=TRUE, as.is=TRUE)
+	kmer.data <- read.csv(kmer.file, header=TRUE, as.is=TRUE, comment.char="#")
 	kmers <- unique(kmer.data[,"peptide"])
-	kmer.scores <- list()
+	kmer.scores <- new.env(hash=TRUE)
 	for (peptide.file in peptide.files) {
 		data <- read.csv(peptide.file,header=FALSE,as.is=TRUE,row.names=1)
 		sequences <- unlist(lapply(data[seqname,],"as.character"))[1:length(data[seqname,])]
@@ -42,11 +42,13 @@ kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 				Cons <- max(C-Cgap, Cons, na.rm=TRUE)
 			}
 			# if peptide occurs in multiple proteins it's already scored, addend with another score
-			if (hasName(kmer.scores, kmer)) {
-				kmer.scores[[kmer]][["quality"]] <- c(kmer.scores[[kmer]][["quality"]], Qscore/nchar(kmer))
-				kmer.scores[[kmer]][["conservation.beta"]] <- c(kmer.scores[[kmer]][["conservation.beta"]], Bcons/nchar(kmer))
-				kmer.scores[[kmer]][["conservation.human"]] <- c(kmer.scores[[kmer]][["conservation.human"]], Hcons/nchar(kmer))
-				kmer.scores[[kmer]][["conservation.combined"]] <- c(kmer.scores[[kmer]][["conservation.combined"]], Cons/nchar(kmer))
+			if (!is.null(kmer.scores[[kmer]])) {
+				scores <- kmer.scores[[kmer]]
+				scores[["quality"]] <- c(scores[["quality"]], Qscore/nchar(kmer))
+				scores[["conservation.beta"]] <- c(scores[["conservation.beta"]], Bcons/nchar(kmer))
+				scores[["conservation.human"]] <- c(scores[["conservation.human"]], Hcons/nchar(kmer))
+				scores[["conservation.combined"]] <- c(scores[["conservation.combined"]], Cons/nchar(kmer))
+				kmer.scores[[kmer]] <- scores
 			}
 			else {
 				kmer.scores[[kmer]] <- list(quality=Qscore/nchar(kmer), conservation.beta=Bcons/nchar(kmer), conservation.human=Hcons/nchar(kmer), conservation.combined=Cons/nchar(kmer))
@@ -64,3 +66,11 @@ kmerConservation <- function(kmer.file, peptide.files, seqname="SARS-CoV-2") {
 	}
 	return(kmer.data)
 }
+
+
+#----------
+# generate figures for paper
+#----------
+# Supplementary Figure XXX
+peptide.files <- dir("alignments", pattern=".csv", full.names=TRUE)
+data <- kmerConservation("covid_netmhcpan_scores_all_alleles.csv", peptide.files)
