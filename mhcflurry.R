@@ -11,6 +11,7 @@ hla_cleavedflurry_filt$allele <- reorder(hla_cleavedflurry_filt$allele,hla_cleav
 table(hla_cleavedflurry_filt$allele)
 hla_cleavedflurry_filt$class <- rep(1,nrow(hla_cleavedflurry_filt))
 hla_cleavedflurry_filt$class <- ifelse(grepl("LA-A", hla_cleavedflurry_filt$allele), 'A', ifelse(grepl("LA-B", hla_cleavedflurry_filt$allele), 'B', 'C'))
+write.csv(hla_cleavedflurry_filt,"covid_flurry_500.csv", row.names=FALSE)
 
 
 #flurrysars
@@ -24,6 +25,8 @@ sars_hla_cleavedflurry_filt$occ_50 <- ifelse(sars_hla_cleavedflurry_filt$less_th
 table(sars_hla_cleavedflurry_filt$allele)
 sars_hla_cleavedflurry_filt$class <- rep(1,nrow(sars_hla_cleavedflurry_filt))
 sars_hla_cleavedflurry_filt$class <- ifelse(grepl("LA-A", sars_hla_cleavedflurry_filt$allele), 'A', ifelse(grepl("LA-B", sars_hla_cleavedflurry_filt$allele), 'B', 'C'))
+
+write.csv(sars_hla_cleavedflurry_filt,"sars_flurry_500.csv", row.names=FALSE)
 
 
 #plotting
