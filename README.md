@@ -13,10 +13,9 @@ We ran `R` scripts with [`R` v3.6.2](https://ftp.osuosl.org/pub/cran/src/base/R-
 
 *Python and python packages:*
 
-We ran python scripts with python 2?.7?.XX??, installed using [Anaconda](https://www.anaconda.com/distribution/). We made use of the following python packages, installable with `pip`:
-
-for example...
-* [`biopython` v1.75](https://github.com/biopython/biopython)
+We ran python scripts with Python 3.7, installed using [Anaconda](https://www.anaconda.com/distribution/). See docstrings of `*.py` files for further information on reproducing results. Packages were installed with `pip3` and include
+* `matplotlib`
+* `mmh3`
 
 ## Data
 
