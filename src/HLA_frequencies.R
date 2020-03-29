@@ -12,11 +12,12 @@ require(rworldmap)
 alleles.outfile <- "HLA-freqs.rda"
 iso3.outfile <- "HLA-ISO3-freqs.rda"
 global.outfile <- "HLA-freqs-global.rda"
+individuals.outfile <- "HLA-individuals.rda"
 MHC.alleles.infile <- "supporting_data/netmhcpan_allele_list.txt"
 plotdir <- "plots"
 
 #--------------------
-# get allele frequency data
+# get individual allele frequency data
 #--------------------
 alleles <- data.frame(HLA=character(), pop.ID=numeric(), pop.name=character(), freq=numeric(), sample.size=numeric())
 for (HLA in LETTERS[1:3]) {
@@ -92,8 +93,62 @@ alleles[which(alleles[,"country"]=="ROM"), "country"] <- "ROU"
 alleles[which(alleles[,"country"]=="KUR"), "country"] <- "IRQ"
 save(alleles,file=alleles.outfile)
 
+#--------------------
+# get per-individual HLA combinations
+#--------------------
+individuals <- data.frame(A1=character(), A2=character(), B1=character(), B2=character(), C1=character(), C2=character(), pop.ID=numeric())
+for (pop in popIDs) {
+	data <- (paste0("http://www.allelefrequencies.net/viewrawdata.asp?pop_id=",pop) %>%
+		read_html() %>%
+  		html_nodes(xpath = '//*[@style="width: 700px; border-top: 1px solid #cccccc; border-left: 1px solid #cccccc; border-bottom: 3px solid #aaaaaa; border-right: 3px solid #aaaaaa;"]/table'))[[2]]
+  	if (data %>% html_text() %>% grepl(pattern="no public genotype")) {
+  		print(paste0("No genotype data available for population ID: ",pop)) 
+  	} else {
+		print(paste0("Population ID: ",pop))
+	  	data <- data %>%
+	  		html_table()
+	  	A <- which(apply(data,2,function(x) { any(grepl(pattern="A*",x, fixed=TRUE))}))
+	  	if (length(A) < 2) {
+	  		A1 <- A2 <- rep(NA, nrow(data))
+	  	} else {
+	  		A1 <- data[,A[1]]
+	  		if (length(C) < 1) {
+	  			A2 <- rep(NA, nrow(data))
+	  		} else {
+		  		A2 <- data[,A[2]]	  			
+	  		}
+	  	}
+	  	B <- which(apply(data,2,function(x) { any(grepl(pattern="B*",x, fixed=TRUE))}))
+	  	if (length(B) < 2) {
+	  		B1 <- B2 <- rep(NA, nrow(data))
+	  	} else {
+	  		B1 <- data[,B[1]]
+	  		if (length(B) < 1) {
+	  			B2 <- rep(NA, nrow(data))
+	  		} else {
+		  		B2 <- data[,B[2]]	  			
+	  		}
+	  	}
+	  	C <- which(apply(data,2,function(x) { any(grepl(pattern="C*",x, fixed=TRUE))}))
+	  	if (length(C) < 2) {
+	  		C1 <- C2 <- rep(NA, nrow(data))
+	  	} else {
+	  		C1 <- data[,C[1]]
+	  		if (length(C) < 1) {
+	  			C2 <- rep(NA, nrow(data))
+	  		} else {
+		  		C2 <- data[,C[2]]	  			
+	  		}
+	  	}
+	  	individuals <- rbind(individuals, data.frame(A1=A1, A2=A2, B1=B1, B2=B2, C1=C1, C2=C2, pop.ID=rep(pop, nrow(data))))
+  	}
+}
+individuals[individuals=="untyped"] <- NA
+individuals <- individuals[which(unlist(apply(individuals,1,function(x) {!all(is.na(x))}))),]
+save(individuals, file=individuals.outfile)
+
 #-----------------------
-# aggregate allele data by country (ISO3)
+# aggregate individual allele data by country (ISO3)
 #-----------------------
 # FUTURE DEVELOPMENT: first summarize allele frequency by ethnic population, THEN collapse to country level based on ethnic frequency in population
 # --> will achieve more accurate population-level estimates because some small ethnic groups are otherwise over-represented in individual countries, e.g. Aboriginal data is >>20% of HLA info for Australia, but they are only ~3% of country's population

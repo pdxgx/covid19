@@ -13,7 +13,8 @@ We ran `R` scripts with [`R` v3.6.2](https://ftp.osuosl.org/pub/cran/src/base/R-
 
 *Python and python packages:*
 
-We ran python scripts with Python 3.7, installed using [Anaconda](https://www.anaconda.com/distribution/). See docstrings of `*.py` files for further information on reproducing results. Packages were installed with `pip3` and include
+We ran python scripts with Python 3.7, installed using [Anaconda](https://www.anaconda.com/distribution/). See docstrings of `*.py` files for further information on reproducing results. Packages were installed with `pip3` and include:
+
 * `matplotlib`
 * `mmh3`
 
