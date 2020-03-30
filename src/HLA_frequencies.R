@@ -14,6 +14,7 @@ iso3.outfile <- "HLA-ISO3-freqs.rda"
 global.outfile <- "HLA-freqs-global.rda"
 individuals.outfile <- "HLA-individuals.rda"
 haplotypes.outfile <- "HLA-haplotypes.rda"
+haplotype.iso3.outfile <- "haplotype-ISO3-freqs.rda"
 MHC.alleles.infile <- "supporting_data/netmhcpan_allele_list.txt"
 plotdir <- "plots"
 
@@ -149,7 +150,7 @@ individuals <- individuals[which(unlist(apply(individuals,1,function(x) {!all(is
 save(individuals, file=individuals.outfile)
 
 #--------------------
-# get allele haplotype frequency data
+# get HLA haplotype frequency data
 #--------------------
 haplotypes <- data.frame(A=character(), B=character(), C=character(), pop.ID=numeric(), freq=numeric())
 for (pop in popIDs) {
@@ -196,26 +197,25 @@ save(haplotypes,file=haplotypes.outfile)
 # UN-level data with relative size of ethnic populations in each country: http://data.un.org/Data.aspx?d=POP&f=tableCode:26
 countries <- get(data(countryExData))
 hla.iso3 <- data.frame(ISO3=character(), HLA=character(), freq=numeric(), popsize=numeric())
-#ISO3 <- unique(alleles[,"country"])
 for (ISO3 in unique(alleles[,"country"])) {
 	data <- alleles[which(alleles[,"country"] == ISO3),]
-	switch(ISO3,
+	popsize <- switch(ISO3,
 		# 2005 population statistics from World Bank, http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv & https://www.worldometers.info/world-population/
-		MTQ = popsize <- 397.19,
-		SRB = popsize <- 7441,
-		HKG = popsize <- 6813.2,
-		STP = popsize <- 155.63,
-		SGP = popsize <- 4265.762,
-		CPV = popsize <- 474.567,
-		LBY = popsize <- 5798.614,
-		ASM = popsize <- 59.118,
-		NCL = popsize <- 232.25,
-		GNQ = popsize <- 757.317,
-		TWN = popsize <- 22705.713,
+		MTQ = 397.19,
+		SRB = 7441,
+		HKG = 6813.2,
+		STP = 155.63,
+		SGP = 4265.762,
+		CPV = 474.567,
+		LBY = 5798.614,
+		ASM = 59.118,
+		NCL = 232.25,
+		GNQ = 757.317,
+		TWN = 22705.713,
 		# Canada HLA data only available for BC First Nations (Athabaskan and Penutian)
 		# Canada First Nations are ~4% of national population 
-		CAN = popsize <- 32243.753 * 0.04,
-		popsize <- countries[which(countries[,1]==ISO3),"Population2005"]
+		CAN = 32243.753 * 0.04,
+		countries[which(countries[,1]==ISO3),"Population2005"]
 	)
 	for (HLA in unique(as.character(data[,"HLA"]))) {
 		# aggregate codes (A*01:01 will include contributions from e.g. A*01:01:01 and A*01:01:02 in addition to A*01:01 itself)
@@ -226,6 +226,60 @@ for (ISO3 in unique(alleles[,"country"])) {
 	}
 }
 save(hla.iso3,file=iso3.outfile)
+
+#-----------------------
+# aggregate haplotype data by country (ISO3)
+#-----------------------
+# FUTURE DEVELOPMENT: first summarize haplotype frequency by ethnic population, THEN collapse to country level based on ethnic frequency in population
+# --> will achieve more accurate population-level estimates because some small ethnic groups are otherwise over-represented in individual countries, e.g. Aboriginal data is >>20% of HLA info for Australia, but they are only ~3% of country's population
+# UN-level data with relative size of ethnic populations in each country: http://data.un.org/Data.aspx?d=POP&f=tableCode:26
+haplotype.iso3 <- data.frame(ISO3=character(), A=character(), B=character(), C=character(), freq=numeric(), popsize=numeric())
+for (ISO3 in unique(alleles[,"country"])) {
+	data <- unique(alleles[which(alleles[,"country"] == ISO3),c("pop.ID", "sample.size")])
+	popsize <- switch(ISO3,
+		# 2005 population statistics from World Bank, http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv & https://www.worldometers.info/world-population/
+		MTQ = 397.19,
+		SRB = 7441,
+		HKG = 6813.2,
+		STP = 155.63,
+		SGP = 4265.762,
+		CPV = 474.567,
+		LBY = 5798.614,
+		ASM = 59.118,
+		NCL = 232.25,
+		GNQ = 757.317,
+		TWN = 22705.713,
+		# Canada HLA data only available for BC First Nations (Athabaskan and Penutian)
+		# Canada First Nations are ~4% of national population 
+		CAN = 32243.753 * 0.04,
+		countries[which(countries[,1]==ISO3),"Population2005"]
+	)
+	haps <- haplotypes[which(haplotypes[,"pop.ID"] %in% data[,"pop.ID"]),]
+	if (nrow(haps) < 1) { next }
+	apply(unique(haps[,1:3]),1,function(hap) {
+			if (!is.na(hap[1])) {
+				which.hap <- which(haps[,"A"]==hap[1])
+			}
+			else {
+				which.hap <- which(is.na(haps[,"A"]))
+			}
+			if (!is.na(hap[2])) {
+				which.hap <- intersect(which.hap, which(haps[,"B"]==hap[2]))
+			}
+			else {
+				which.hap <- intersect(which.hap, which(is.na(haps[,"B"])))
+			}
+			if (!is.na(hap[3])) {
+				which.hap <- intersect(which.hap, which(haps[,"C"]==hap[3]))
+			}
+			else {
+				which.hap <- intersect(which.hap, which(is.na(haps[,"C"])))
+			}
+			sample.sizes <- as.numeric(data[match(haps[which.hap,"pop.ID"], data[,"pop.ID"]), "sample.size"])
+			haplotype.iso3 <<- rbind(haplotype.iso3, data.frame(ISO3=ISO3, A=hap[1], B=hap[2], C=hap[3], freq=weighted.mean(as.numeric(haps[which.hap,"freq"]), w=sample.sizes)))
+		})
+}
+save(haplotype.iso3,file=haplotype.iso3.outfile)
 
 #-----------------------
 # estimate global allele frequency
