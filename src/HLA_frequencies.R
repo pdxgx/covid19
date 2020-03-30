@@ -13,6 +13,7 @@ alleles.outfile <- "HLA-freqs.rda"
 iso3.outfile <- "HLA-ISO3-freqs.rda"
 global.outfile <- "HLA-freqs-global.rda"
 individuals.outfile <- "HLA-individuals.rda"
+haplotypes.outfile <- "HLA-haplotypes.rda"
 MHC.alleles.infile <- "supporting_data/netmhcpan_allele_list.txt"
 plotdir <- "plots"
 
@@ -146,6 +147,42 @@ for (pop in popIDs) {
 individuals[individuals=="untyped"] <- NA
 individuals <- individuals[which(unlist(apply(individuals,1,function(x) {!all(is.na(x))}))),]
 save(individuals, file=individuals.outfile)
+
+#--------------------
+# get allele haplotype frequency data
+#--------------------
+haplotypes <- data.frame(A=character(), B=character(), C=character(), pop.ID=numeric(), freq=numeric())
+for (pop in popIDs) {
+	page <- 1
+	while (page > 0) {
+		print(paste0("Population ID: ",pop," (page ",page,")"))
+		qurl <- paste0("http://www.allelefrequencies.net/hla6003a.asp?hla_population=", pop, "&page=", page)
+		data <- qurl %>%
+			read_html()
+   		recs <- data %>%
+   			html_nodes(xpath = '//*[@id="divGenNavig"]/table') %>%
+   			html_table()
+   		recs <- recs[[1]][1]
+   		if (sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\1", recs) ==
+   			sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\2", recs)) {
+   			page <- 0
+   		} else {
+   			page <- page + 1
+   		}
+		data <- data %>%
+  			html_nodes(xpath = '//*[@id="divGenDetail"]/table') %>% 
+    		html_table() %>%
+    		unlist(recursive=FALSE)
+    	A <- sub(".*(A[*][0-9:]+).*", "\\1", data$Haplotype)
+    	A[!grepl("A*", fixed=TRUE, A)] <- NA
+    	B <- sub(".*(B[*][0-9:]+).*", "\\1", data$Haplotype)
+    	B[!grepl("B*", fixed=TRUE, B)] <- NA
+    	C <- sub(".*(C[*][0-9:]+).*", "\\1", data$Haplotype)
+    	C[!grepl("C*", fixed=TRUE, C)] <- NA
+    	haplotypes <- rbind(haplotypes, data.frame(A=A, B=B, C=C, pop.ID=rep(pop, length(A)), freq=as.numeric(sub("[^0-9,.]+","",data[[5]]))))
+	}
+}
+save(haplotypes,file=haplotypes.outfile)
 
 #-----------------------
 # aggregate individual allele data by country (ISO3)
