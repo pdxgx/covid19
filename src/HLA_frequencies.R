@@ -162,6 +162,10 @@ for (pop in popIDs) {
    		recs <- data %>%
    			html_nodes(xpath = '//*[@id="divGenNavig"]/table') %>%
    			html_table()
+   		if (length(recs) < 1) {
+   			page <- 0
+   			next
+   		}
    		recs <- recs[[1]][1]
    		if (sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\1", recs) ==
    			sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\2", recs)) {
