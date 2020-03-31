@@ -12,6 +12,7 @@ require(rworldmap)
 alleles.outfile <- "HLA-freqs.rda"
 iso3.outfile <- "HLA-ISO3-freqs.rda"
 global.outfile <- "HLA-freqs-global.rda"
+global.haplotype.outfile <- "haplotype-freqs-global.rda"
 individuals.outfile <- "HLA-individuals.rda"
 haplotypes.outfile <- "HLA-haplotypes.rda"
 haplotype.iso3.outfile <- "haplotype-ISO3-freqs.rda"
@@ -276,13 +277,13 @@ for (ISO3 in unique(alleles[,"country"])) {
 				which.hap <- intersect(which.hap, which(is.na(haps[,"C"])))
 			}
 			sample.sizes <- as.numeric(data[match(haps[which.hap,"pop.ID"], data[,"pop.ID"]), "sample.size"])
-			haplotype.iso3 <<- rbind(haplotype.iso3, data.frame(ISO3=ISO3, A=hap[1], B=hap[2], C=hap[3], freq=weighted.mean(as.numeric(haps[which.hap,"freq"]), w=sample.sizes)))
+			haplotype.iso3 <<- rbind(haplotype.iso3, data.frame(ISO3=ISO3, A=hap[1], B=hap[2], C=hap[3], freq=weighted.mean(as.numeric(haps[which.hap,"freq"]), w=sample.sizes), popsize=popsize))
 		})
 }
 save(haplotype.iso3,file=haplotype.iso3.outfile)
 
 #-----------------------
-# estimate global allele frequency
+# estimate global allele and haplotype frequency
 #-----------------------
 global_allele_freqs <- data.frame(HLA=character(), freq=numeric())
 for (hla in as.character(unique(hla.iso3[,"HLA"]))) {
@@ -290,6 +291,30 @@ for (hla in as.character(unique(hla.iso3[,"HLA"]))) {
 	global_allele_freqs <- rbind(global_allele_freqs, data.frame(HLA=hla, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]))))
 }
 save(global_allele_freqs, file=global.outfile)
+
+global_haplotype_freqs <- data.frame(A=character(), B=character(), C=character(), freq=numeric())
+apply(unique(haplotype.iso3[,2:4]),1,function(hap) {
+	if (!is.na(hap[1])) {
+		which.hap <- which(haplotype.iso3[,"A"]==hap[1])
+	}
+	else {
+		which.hap <- which(is.na(haplotype.iso3[,"A"]))
+	}
+	if (!is.na(hap[2])) {
+		which.hap <- intersect(which.hap, which(haplotype.iso3[,"B"]==hap[2]))
+	}
+	else {
+		which.hap <- intersect(which.hap, which(is.na(haplotype.iso3[,"B"])))
+	}
+	if (!is.na(hap[3])) {
+		which.hap <- intersect(which.hap, which(haplotype.iso3[,"C"]==hap[3]))
+	}
+	else {
+		which.hap <- intersect(which.hap, which(is.na(haplotype.iso3[,"C"])))
+	}
+	global_haplotype_freqs <<- rbind(global_haplotype_freqs, data.frame(A=hap[1], B=hap[2], C=hap[3], freq=weighted.mean(as.numeric(haplotype.iso3[which.hap,"freq"]), w=as.numeric(haplotype.iso3[which.hap,"popsize"]))))
+})
+save(global_haplotype_freqs, file=global.haplotype.outfile)
 
 #----------
 # plot/map data function
