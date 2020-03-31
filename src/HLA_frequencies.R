@@ -385,6 +385,20 @@ par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
+# Figure 6
+pdf(file=paste0(plotdir, "/Figure6.pdf"), width=9,height=8.5)
+layout(matrix(1:6,nr=3,nc=2, byrow=TRUE))
+par(mar=c(2.1,4.1,2.1,2.1))
+for (HLA in c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02")) {
+	haps <- getHaplotypeFreqs(HLA)
+	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
+	barplot(haps[,"count"]*100,ylim=c(0,60),ylab="Presented SARS-CoV-2 peptides (%)", main=paste0(HLA, " Haplotypes"))
+	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
+	abline(h=avg.count, lty="dashed", col="red")
+	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red")
+}
+dev.off()
+
 # Supplementary Figure S1
 pdf(file=paste0(plotdir, "/best+worst_HLA_conserved_peptides.pdf"), width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2))
