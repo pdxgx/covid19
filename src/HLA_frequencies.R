@@ -313,6 +313,7 @@ apply(unique(haplotype.iso3[,2:4]),1,function(hap) {
 		which.hap <- intersect(which.hap, which(is.na(haplotype.iso3[,"C"])))
 	}
 	global_haplotype_freqs <<- rbind(global_haplotype_freqs, data.frame(A=hap[1], B=hap[2], C=hap[3], freq=weighted.mean(as.numeric(haplotype.iso3[which.hap,"freq"]), w=as.numeric(haplotype.iso3[which.hap,"popsize"]))))
+	return()
 })
 save(global_haplotype_freqs, file=global.haplotype.outfile)
 
