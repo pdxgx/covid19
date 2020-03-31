@@ -185,7 +185,7 @@ for (pop in popIDs) {
     	B[!grepl("B*", fixed=TRUE, B)] <- NA
     	C <- sub(".*(C[*][0-9:]+).*", "\\1", data$Haplotype)
     	C[!grepl("C*", fixed=TRUE, C)] <- NA
-    	haplotypes <- rbind(haplotypes, data.frame(A=A, B=B, C=C, pop.ID=rep(pop, length(A)), freq=as.numeric(sub("[^0-9,.]+","",data[[5]]))))
+    	haplotypes <- rbind(haplotypes, data.frame(A=A, B=B, C=C, pop.ID=rep(pop, length(A)), freq=as.numeric(sub("[^0-9,.]+","",format(data[[5]], scientific=FALSE)))))
 	}
 }
 save(haplotypes,file=haplotypes.outfile)
