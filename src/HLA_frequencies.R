@@ -401,7 +401,10 @@ for (HLA in MHC_alleles) {
 	par(mar=c(1.1,4.1,5.1,2.1))
 	haps <- getHaplotypeFreqs(HLA)
 	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
-	barplot(haps[,"count"]*100,ylim=c(0,100),ylab="Presented SARS-CoV-2 peptides (%)")
+	barplot(haps[,"count"]*100,ylim=c(0,80),ylab="Presented SARS-CoV-2 peptides (%)")
+	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
+	abline(h=avg.count, lty="dashed", col="red")
+	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red")
 	par(mar=c(1.1,4.1,3.1,2.1))
 	barplot(-haps[,"freq"],ylim=c(-ceiling(max(haps[,"freq"])),0),ylab="Global haplotype frequency (%)",axes=FALSE, main=paste0(HLA, " Haplotypes"))
 	axis(side=2, at=pretty(-haps[,"freq"]),labels=abs(pretty(-haps[,"freq"])))
