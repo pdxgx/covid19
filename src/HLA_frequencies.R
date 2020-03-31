@@ -317,6 +317,32 @@ apply(unique(haplotype.iso3[,2:4]),1,function(hap) {
 })
 save(global_haplotype_freqs, file=global.haplotype.outfile)
 
+
+#----------
+# get average aggregate haplotype data for all haplotypes containing a single HLA allele
+#----------
+
+SARS_CoV_2 <- read.csv("covid_netmhcpan_scores_all_alleles.csv", header=TRUE)
+#N <- length(unique(SARS_CoV_2$Peptide))
+SARS_CoV_2 <- SARS_CoV_2[as.numeric(SARS_CoV_2$Binding_affinity) < 500,]
+N <- length(unique(SARS_CoV_2$Peptide))
+SARS_CoV_2 <- aggregate(rep(1,nrow(SARS_CoV_2)), by=list(SARS_CoV_2[,"Allele"]), FUN=sum)
+allele.data <- SARS_CoV_2[,2]
+names(allele.data) <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2[,1])
+
+## !!!!!  ERROR in B15:03 frequency????  one haplotype > 200%!! and others very small?
+getHaplotypeFreqs <- function(HLA) {
+	data <- switch(substr(HLA, 1, 1),
+			A = global_haplotype_freqs[which(global_haplotype_freqs[,"A"] == HLA),],
+			B = global_haplotype_freqs[which(global_haplotype_freqs[,"B"] == HLA),],
+			C = global_haplotype_freqs[which(global_haplotype_freqs[,"C"] == HLA),])
+	# get average number of peptides presented
+	counts <- unlist(apply(data, 1, function(hap) {
+			sum(as.numeric(unlist(allele.data[hap])), na.rm=TRUE)/min(1, length(which(!is.na(hap))))
+		}))
+	return(as.data.frame(cbind(data, data.frame(count=counts/N))))
+}
+
 #----------
 # plot/map data function
 #----------
@@ -368,5 +394,16 @@ dev.off()
 
 # Appendix 2
 for (HLA in MHC_alleles) {
-	HLAgeoPlot(HLA, outdir=plotdir)
+	pdf(file=paste0(plotdir, "/HLAmap-", gsub(":", "_", HLA), ".pdf"), width=10,height=12)
+	layout(matrix(1:3,nr=3,nc=1), heights=c(3.5,2,2))
+	par(mar=c(5.1,4.1,3.1,2.1))
+	HLAgeoPlot(HLA)
+	par(mar=c(1.1,4.1,5.1,2.1))
+	haps <- getHaplotypeFreqs(HLA)
+	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
+	barplot(haps[,"count"]*100,ylim=c(0,100),ylab="Presented SARS-CoV-2 peptides (%)")
+	par(mar=c(1.1,4.1,3.1,2.1))
+	barplot(-haps[,"freq"],ylim=c(-ceiling(max(haps[,"freq"])),0),ylab="Global haplotype frequency (%)",axes=FALSE, main=paste0(HLA, " Haplotypes"))
+	axis(side=2, at=pretty(-haps[,"freq"]),labels=abs(pretty(-haps[,"freq"])))
+	dev.off()
 }
