@@ -346,11 +346,8 @@ for(A in grep("A*", fixed=TRUE, MHC_alleles, value=TRUE)) {
 		}
 	}
 }
-#SARS_CoV_2 <- aggregate(rep(1,nrow(SARS_CoV_2)), by=list(SARS_CoV_2[,"Allele"]), FUN=sum)
-#allele.data <- SARS_CoV_2[,2]
-#names(allele.data) <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2[,1])
 
-getHaplotypeFreqs <- function(HLA) {
+getHaplotypeCounts <- function(HLA) {
 	data <- switch(substr(HLA, 1, 1),
 			A = global_haplotype_freqs[which(global_haplotype_freqs[,"A"] == HLA),],
 			B = global_haplotype_freqs[which(global_haplotype_freqs[,"B"] == HLA),],
@@ -414,7 +411,7 @@ pdf(file=paste0(plotdir, "/Figure6.pdf"), width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2, byrow=TRUE))
 par(mar=c(2.1,4.1,2.1,2.1))
 for (HLA in c("A*02:02", "A*25:01", "B*15:03", "B*46:01", "C*12:03", "C*01:02")) {
-	haps <- getHaplotypeFreqs(HLA)
+	haps <- getHaplotypeCounts(HLA)
 	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
 	col <- rep("black", nrow(haps))
 	col[which(is.na(haps[,"A"]) | is.na(haps[,"B"]) | is.na(haps[,"C"]))] <- "darkgray"
@@ -436,26 +433,24 @@ HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
 # Appendix 2
-MHC_alleles <- as.character(unlist(read.csv(MHC.alleles.infile, header=TRUE))) %>%
-	sub(pattern="HLA[-]([A-C])",replacement="\\1*")
 for (HLA in MHC_alleles) {
 	pdf(file=paste0(plotdir, "/HLAmap-", gsub(":", "_", HLA), ".pdf"), width=10,height=12)
 	layout(matrix(1:3,nr=3,nc=1), heights=c(3.5,2,2))
 	par(mar=c(5.1,4.1,3.1,2.1))
 	HLAgeoPlot(HLA)
 	par(mar=c(1.1,4.1,5.1,2.1))
-	haps <- getHaplotypeFreqs(HLA)
+	haps <- getHaplotypeCounts(HLA)
 	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
 	col <- rep("black", nrow(haps))
 	col[which(is.na(haps[,"A"]) | is.na(haps[,"B"]) | is.na(haps[,"C"]))] <- "darkgray"
-	barplot(haps[,"count"]*100,ylim=c(0,30),ylab="Presented SARS-CoV-2 peptides (%)", col=col, border=NA)
+	barplot(haps[,"count"]*100,ylim=c(0,50),ylab="Presented SARS-CoV-2 peptides (%)", col=col, border=NA)
 	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
 	abline(h=avg.count, lty="dashed", col="red")
 	abline(h=allele.data[HLA, HLA, HLA]*100/N, lty="dashed",col="blue")
 	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red", adj=0)
 	mtext(paste0(round(allele.data[HLA, HLA, HLA]*100/N, digits=1),"%"),side=4,at=allele.data[HLA, HLA, HLA]*100/N, col="blue", adj=1)
 	par(mar=c(1.1,4.1,3.1,2.1))
-	barplot(-haps[,"freq"],ylim=c(-ceiling(max(haps[,"freq"])),0),ylab="Global haplotype frequency (%)",axes=FALSE, main=paste0(HLA, " Haplotypes"), col=col, border=NA)
+	barplot(-haps[,"freq"],ylim=c(-ceiling(max(haps[,"freq"])),0),ylab="Global haplotype frequency (%)",axes=FALSE, main=paste0(HLA, " Haplotypes (n=", nrow(haps), ")"), col=col, border=NA)
 	axis(side=2, at=pretty(-haps[,"freq"]),labels=abs(pretty(-haps[,"freq"])))
 	dev.off()
 }
