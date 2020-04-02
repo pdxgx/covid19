@@ -332,37 +332,24 @@ hash <- new.env(hash=TRUE)
 for (HLA in MHC_alleles) {
 	hash[[HLA]] <- as.character(SARS_CoV_2$Peptide[which(SARS_CoV_2$Allele==HLA)])
 }
-allele.data <- array(dim=rep(length(MHC_alleles), 3), dimnames=list(MHC_alleles, MHC_alleles, MHC_alleles))
-for(A in grep("A*", fixed=TRUE, MHC_alleles, value=TRUE)) {
-	allele.data[A, A, A] <- length(hash[[A]])
-	for (B in grep("B*", fixed=TRUE, MHC_alleles, value=TRUE)) {
-		allele.data[A, B, c(A,B)] <- length(union(hash[[A]], hash[[B]]))
-		allele.data[B, B, B] <- length(hash[[B]])
-		for (C in grep("C*", fixed=TRUE, MHC_alleles, value=TRUE)) {
-			allele.data[A, B, C] <- length(union(hash[[A]], union(hash[[B]], hash[[C]])))
-			allele.data[A, c(A,C), C] <- length(union(hash[[A]], hash[[C]]))
-			allele.data[c(B,C), B, C] <- length(union(hash[[B]], hash[[C]]))
-			allele.data[C, C, C] <- length(hash[[C]])			
-		}
+
+# function to calculate number of unique peptides presented by a set of HLA alleles
+allele.data <- function(HLA=NULL) {
+	HLA <- HLA[which((HLA %in% MHC_alleles) & (!is.na(HLA)))]
+	peptides <- character()
+	for (hla in HLA) {
+		peptides <- union(peptides, hash[[hla]])
 	}
+	return(length(peptides))
 }
 
+# function to get distribution of peptide presentation for all haplotypes containing a given HLA allele
 getHaplotypeCounts <- function(HLA) {
 	data <- switch(substr(HLA, 1, 1),
 			A = global_haplotype_freqs[which(global_haplotype_freqs[,"A"] == HLA),],
 			B = global_haplotype_freqs[which(global_haplotype_freqs[,"B"] == HLA),],
 			C = global_haplotype_freqs[which(global_haplotype_freqs[,"C"] == HLA),])
-	data <- data[which((data[,"A"] %in% MHC_alleles) | (is.na(data[,"A"]))),]
-	data <- data[which((data[,"B"] %in% MHC_alleles) | (is.na(data[,"B"]))),]
-	data <- data[which((data[,"C"] %in% MHC_alleles) | (is.na(data[,"C"]))),]
-	# get average number of peptides presented
-	counts <- unlist(apply(data[,1:3], 1, function(hap) {
-			if (all(is.na(hap))) {
-				return(0)
-			}
-			hap[which(is.na(hap))] <- hap[which(!is.na(hap))[1]]
-			return(allele.data[hap[1], hap[2], hap[3]])
-		}))
+	counts <- unlist(apply(data[,1:3], 1, allele.data))
 	return(as.data.frame(cbind(data, data.frame(count=counts/N))))
 }
 
@@ -419,9 +406,9 @@ for (HLA in c("A*02:02", "A*25:01", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
 	barplot(haps[,"count"]*100,ylim=c(0,50),ylab="Presented SARS-CoV-2 peptides (%)", main=paste0(HLA, " Haplotypes (n=", nrow(haps), ")"), col=col, border=NA)
 	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
 	abline(h=avg.count, lty="dashed", col="red")
-	abline(h=allele.data[HLA, HLA, HLA]*100/N, lty="dashed",col="blue")
+	abline(h=allele.data(HLA)*100/N, lty="dashed",col="blue")
 	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red", adj=0)
-	mtext(paste0(round(allele.data[HLA, HLA, HLA]*100/N, digits=1),"%"),side=4,at=allele.data[HLA, HLA, HLA]*100/N, col="blue", adj=1)
+	mtext(paste0(round(allele.data(HLA)*100/N, digits=1),"%"),side=4,at=allele.data(HLA)*100/N, col="blue", adj=1)
 }
 dev.off()
 
@@ -430,6 +417,23 @@ pdf(file=paste0(plotdir, "/best+worst_HLA_conserved_peptides.pdf"), width=9,heig
 layout(matrix(1:6,nr=3,nc=2))
 par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
+dev.off()
+
+# Supplementary Figure S4
+pdf(file=paste0(plotdir, "/SupplementaryFigureS4.pdf"), width=8, height=6)
+full.genotypes <- which(unlist(apply(individuals[,1:6], 1, function(x) { all((x %in% MHC_alleles) & !is.na(x)) })))
+counts <- sort(unlist(apply(individuals[full.genotypes,], 1, allele.data)), decreasing=TRUE)
+hist <- hist(counts*100/N, n=length(counts), plot=FALSE)
+plot(hist,xlab="Presented SARS-CoV-2 peptides (%)", ylab="Individuals (#)", main="")
+rect(quantile(counts*100/N,0.05), 0, quantile(counts*100/N,0.95), 100, col=rgb(1,0.85,0.85), border=NA)
+rect(quantile(counts*100/N,0.25), 0, quantile(counts*100/N,0.75), 100, col=rgb(1,0.5,0.5), border=NA)
+abline(v=quantile(counts*100/N, 0.5), lty="dashed", col="red")
+mtext(paste0(format(quantile(counts*100/N, 0.5), digits=3), "%"), side=3, at=quantile(counts*100/N, 0.5), col="red")
+mtext(paste0(format(quantile(counts*100/N, 0.25), digits=3), "%"), side=3, at=quantile(counts*100/N, 0.25), col=rgb(1,0.5,0.5), adj=1)
+mtext(paste0(format(quantile(counts*100/N, 0.75), digits=3), "%"), side=3, at=quantile(counts*100/N, 0.75), col=rgb(1,0.5,0.5), adj=0)
+mtext(paste0(format(quantile(counts*100/N, 0.05), digits=3), "%"), side=3, at=quantile(counts*100/N, 0.05), col=rgb(1,0.85,0.85), adj=1)
+mtext(paste0(format(quantile(counts*100/N, 0.95), digits=3), "%"), side=3, at=quantile(counts*100/N, 0.95), col=rgb(1,0.85,0.85), adj=0)
+lines(hist)
 dev.off()
 
 # Appendix 2
@@ -446,9 +450,9 @@ for (HLA in MHC_alleles) {
 	barplot(haps[,"count"]*100,ylim=c(0,50),ylab="Presented SARS-CoV-2 peptides (%)", col=col, border=NA)
 	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
 	abline(h=avg.count, lty="dashed", col="red")
-	abline(h=allele.data[HLA, HLA, HLA]*100/N, lty="dashed",col="blue")
+	abline(h=allele.data(HLA)*100/N, lty="dashed",col="blue")
 	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red", adj=0)
-	mtext(paste0(round(allele.data[HLA, HLA, HLA]*100/N, digits=1),"%"),side=4,at=allele.data[HLA, HLA, HLA]*100/N, col="blue", adj=1)
+	mtext(paste0(round(allele.data(HLA)*100/N, digits=1),"%"),side=4,at=allele.data(HLA)*100/N, col="blue", adj=1)
 	par(mar=c(1.1,4.1,3.1,2.1))
 	barplot(-haps[,"freq"],ylim=c(-ceiling(max(haps[,"freq"])),0),ylab="Global haplotype frequency (%)",axes=FALSE, main=paste0(HLA, " Haplotypes (n=", nrow(haps), ")"), col=col, border=NA)
 	axis(side=2, at=pretty(-haps[,"freq"]),labels=abs(pretty(-haps[,"freq"])))
