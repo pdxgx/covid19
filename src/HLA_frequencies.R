@@ -323,21 +323,48 @@ save(global_haplotype_freqs, file=global.haplotype.outfile)
 #----------
 
 SARS_CoV_2 <- read.csv("covid_netmhcpan_scores_all_alleles.csv", header=TRUE)
+SARS_CoV_2$Allele <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2$Allele)
+MHC_alleles <- unique(SARS_CoV_2$Allele)
 #N <- length(unique(SARS_CoV_2$Peptide))
 SARS_CoV_2 <- SARS_CoV_2[as.numeric(SARS_CoV_2$Binding_affinity) < 500,]
 N <- length(unique(SARS_CoV_2$Peptide))
-SARS_CoV_2 <- aggregate(rep(1,nrow(SARS_CoV_2)), by=list(SARS_CoV_2[,"Allele"]), FUN=sum)
-allele.data <- SARS_CoV_2[,2]
-names(allele.data) <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2[,1])
+hash <- new.env(hash=TRUE)
+for (HLA in MHC_alleles) {
+	hash[[HLA]] <- as.character(SARS_CoV_2$Peptide[which(SARS_CoV_2$Allele==HLA)])
+}
+allele.data <- array(dim=rep(length(MHC_alleles), 3), dimnames=list(MHC_alleles, MHC_alleles, MHC_alleles))
+for(A in grep("A*", fixed=TRUE, MHC_alleles, value=TRUE)) {
+	allele.data[A, A, A] <- length(hash[[A]])
+	for (B in grep("B*", fixed=TRUE, MHC_alleles, value=TRUE)) {
+		allele.data[A, B, c(A,B)] <- length(union(hash[[A]], hash[[B]]))
+		allele.data[B, B, B] <- length(hash[[B]])
+		for (C in grep("C*", fixed=TRUE, MHC_alleles, value=TRUE)) {
+			allele.data[A, B, C] <- length(union(hash[[A]], union(hash[[B]], hash[[C]])))
+			allele.data[A, c(A,C), C] <- length(union(hash[[A]], hash[[C]]))
+			allele.data[c(B,C), B, C] <- length(union(hash[[B]], hash[[C]]))
+			allele.data[C, C, C] <- length(hash[[C]])			
+		}
+	}
+}
+#SARS_CoV_2 <- aggregate(rep(1,nrow(SARS_CoV_2)), by=list(SARS_CoV_2[,"Allele"]), FUN=sum)
+#allele.data <- SARS_CoV_2[,2]
+#names(allele.data) <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2[,1])
 
 getHaplotypeFreqs <- function(HLA) {
 	data <- switch(substr(HLA, 1, 1),
 			A = global_haplotype_freqs[which(global_haplotype_freqs[,"A"] == HLA),],
 			B = global_haplotype_freqs[which(global_haplotype_freqs[,"B"] == HLA),],
 			C = global_haplotype_freqs[which(global_haplotype_freqs[,"C"] == HLA),])
+	data <- data[which((data[,"A"] %in% MHC_alleles) | (is.na(data[,"A"]))),]
+	data <- data[which((data[,"B"] %in% MHC_alleles) | (is.na(data[,"B"]))),]
+	data <- data[which((data[,"C"] %in% MHC_alleles) | (is.na(data[,"C"]))),]
 	# get average number of peptides presented
-	counts <- unlist(apply(data, 1, function(hap) {
-			sum(as.numeric(unlist(allele.data[hap])), na.rm=TRUE)/max(1, length(which(!is.na(hap))))
+	counts <- unlist(apply(data[,1:3], 1, function(hap) {
+			if (all(is.na(hap))) {
+				return(0)
+			}
+			hap[which(is.na(hap))] <- hap[which(!is.na(hap))[1]]
+			return(allele.data[hap[1], hap[2], hap[3]])
 		}))
 	return(as.data.frame(cbind(data, data.frame(count=counts/N))))
 }
@@ -391,11 +418,13 @@ for (HLA in c("A*02:02", "A*25:01", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
 	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
 	col <- rep("black", nrow(haps))
 	col[which(is.na(haps[,"A"]) | is.na(haps[,"B"]) | is.na(haps[,"C"]))] <- "darkgray"
-#	write.table(haps, file=paste0(plotdir, "/Figure6-", HLA, ".csv"), sep=",", quote=FALSE, row.names=FALSE)
-	barplot(haps[,"count"]*100,ylim=c(0,25),ylab="Presented SARS-CoV-2 peptides (%)", main=paste0(HLA, " Haplotypes"), col=col, border=NA)
+	write.table(haps, file=paste0(plotdir, "/Figure6-", HLA, ".csv"), sep=",", quote=FALSE, row.names=FALSE)
+	barplot(haps[,"count"]*100,ylim=c(0,50),ylab="Presented SARS-CoV-2 peptides (%)", main=paste0(HLA, " Haplotypes (n=", nrow(haps), ")"), col=col, border=NA)
 	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
 	abline(h=avg.count, lty="dashed", col="red")
-	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red")
+	abline(h=allele.data[HLA, HLA, HLA]*100/N, lty="dashed",col="blue")
+	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red", adj=0)
+	mtext(paste0(round(allele.data[HLA, HLA, HLA]*100/N, digits=1),"%"),side=4,at=allele.data[HLA, HLA, HLA]*100/N, col="blue", adj=1)
 }
 dev.off()
 
@@ -422,7 +451,9 @@ for (HLA in MHC_alleles) {
 	barplot(haps[,"count"]*100,ylim=c(0,30),ylab="Presented SARS-CoV-2 peptides (%)", col=col, border=NA)
 	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
 	abline(h=avg.count, lty="dashed", col="red")
-	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red")
+	abline(h=allele.data[HLA, HLA, HLA]*100/N, lty="dashed",col="blue")
+	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red", adj=0)
+	mtext(paste0(round(allele.data[HLA, HLA, HLA]*100/N, digits=1),"%"),side=4,at=allele.data[HLA, HLA, HLA]*100/N, col="blue", adj=1)
 	par(mar=c(1.1,4.1,3.1,2.1))
 	barplot(-haps[,"freq"],ylim=c(-ceiling(max(haps[,"freq"])),0),ylab="Global haplotype frequency (%)",axes=FALSE, main=paste0(HLA, " Haplotypes"), col=col, border=NA)
 	axis(side=2, at=pretty(-haps[,"freq"]),labels=abs(pretty(-haps[,"freq"])))
