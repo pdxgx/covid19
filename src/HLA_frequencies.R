@@ -330,7 +330,6 @@ SARS_CoV_2 <- aggregate(rep(1,nrow(SARS_CoV_2)), by=list(SARS_CoV_2[,"Allele"]),
 allele.data <- SARS_CoV_2[,2]
 names(allele.data) <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2[,1])
 
-## !!!!!  ERROR in B15:03 frequency????  one haplotype > 200%!! and others very small?
 getHaplotypeFreqs <- function(HLA) {
 	data <- switch(substr(HLA, 1, 1),
 			A = global_haplotype_freqs[which(global_haplotype_freqs[,"A"] == HLA),],
@@ -338,7 +337,7 @@ getHaplotypeFreqs <- function(HLA) {
 			C = global_haplotype_freqs[which(global_haplotype_freqs[,"C"] == HLA),])
 	# get average number of peptides presented
 	counts <- unlist(apply(data, 1, function(hap) {
-			sum(as.numeric(unlist(allele.data[hap])), na.rm=TRUE)/min(1, length(which(!is.na(hap))))
+			sum(as.numeric(unlist(allele.data[hap])), na.rm=TRUE)/max(1, length(which(!is.na(hap))))
 		}))
 	return(as.data.frame(cbind(data, data.frame(count=counts/N))))
 }
@@ -366,7 +365,7 @@ HLAgeoPlot <- function(HLA, outdir=NULL,unified.freq=FALSE) {
 		mapParams <- mapCountryData(sPDF, nameColumnToPlot="freq", missingCountryCol="lightgray", 
 	  			borderCol="black", oceanCol="lightblue", catMethod=0:freq/100, addLegend=FALSE,
 	  			mapTitle=paste0(hla,"\n(~", format(global_allele_freqs[which(global_allele_freqs[,1]==hla),2]*100, digits=2),"% globally)"))
-		do.call(addMapLegend, c(mapParams, legendWidth=0.5, legendMar=6.5))
+		do.call(addMapLegend, c(mapParams, legendWidth=1, legendMar=6.5))
 		if (!is.null(outdir)) {
 			dev.off()
 		}
@@ -375,24 +374,25 @@ HLAgeoPlot <- function(HLA, outdir=NULL,unified.freq=FALSE) {
 #----------
 # generate figures for paper
 #----------
-MHC_alleles <- as.character(unlist(read.csv(MHC.alleles.infile, header=TRUE))) %>%
-	sub(pattern="HLA[-]([A-C])",replacement="\\1*")
 
 # Figure 5
 pdf(file=paste0(plotdir, "/best+worst_HLA_all_peptides.pdf"), width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2))
 par(mar=c(3.1,0.1,2.1,0.1))
-HLAgeoPlot(c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
+HLAgeoPlot(c("A*02:02", "A*25:01", "B*15:03", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
 # Figure 6
 pdf(file=paste0(plotdir, "/Figure6.pdf"), width=9,height=8.5)
 layout(matrix(1:6,nr=3,nc=2, byrow=TRUE))
 par(mar=c(2.1,4.1,2.1,2.1))
-for (HLA in c("A*02:06", "A*02:07", "B*15:03", "B*46:01", "C*12:03", "C*01:02")) {
+for (HLA in c("A*02:02", "A*25:01", "B*15:03", "B*46:01", "C*12:03", "C*01:02")) {
 	haps <- getHaplotypeFreqs(HLA)
 	haps <- haps[order(haps[,"count"], decreasing=TRUE),]
-	barplot(haps[,"count"]*100,ylim=c(0,60),ylab="Presented SARS-CoV-2 peptides (%)", main=paste0(HLA, " Haplotypes"))
+	col <- rep("black", nrow(haps))
+	col[which(is.na(haps[,"A"]) | is.na(haps[,"B"]) | is.na(haps[,"C"]))] <- "darkgray"
+#	write.table(haps, file=paste0(plotdir, "/Figure6-", HLA, ".csv"), sep=",", quote=FALSE, row.names=FALSE)
+	barplot(haps[,"count"]*100,ylim=c(0,25),ylab="Presented SARS-CoV-2 peptides (%)", main=paste0(HLA, " Haplotypes"), col=col, border=NA)
 	avg.count <- weighted.mean(haps[,"count"]*100, w=haps[,"freq"])
 	abline(h=avg.count, lty="dashed", col="red")
 	mtext(paste0(round(avg.count, digits=1),"%"),side=4,at=avg.count, col="red")
@@ -407,6 +407,8 @@ HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
 # Appendix 2
+MHC_alleles <- as.character(unlist(read.csv(MHC.alleles.infile, header=TRUE))) %>%
+	sub(pattern="HLA[-]([A-C])",replacement="\\1*")
 for (HLA in MHC_alleles) {
 	pdf(file=paste0(plotdir, "/HLAmap-", gsub(":", "_", HLA), ".pdf"), width=10,height=12)
 	layout(matrix(1:3,nr=3,nc=1), heights=c(3.5,2,2))
