@@ -421,6 +421,26 @@ dev.off()
 
 # Supplementary Figure S4
 pdf(file=paste0(plotdir, "/SupplementaryFigureS4.pdf"), width=8, height=6)
+haps <- global_haplotype_freqs[which(global_haplotype_freqs[,"A"] %in% MHC_alleles & 
+		global_haplotype_freqs[,"B"] %in% MHC_alleles & 
+		global_haplotype_freqs[,"C"] %in% MHC_alleles),1:3] %>%
+	apply(MARGIN=1, FUN=allele.data) %>%
+	unlist()
+hist <- hist(haps*100/N, n=length(haps), plot=FALSE)
+plot(hist, xlab="Presented SARS-CoV-2 peptides (%)", ylab="Haplotypes (#)", main="")
+rect(quantile(haps*100/N,0.05), 0, quantile(haps*100/N,0.95), 100, col=rgb(1,0.85,0.85), border=NA)
+rect(quantile(haps*100/N,0.25), 0, quantile(haps*100/N,0.75), 100, col=rgb(1,0.5,0.5), border=NA)
+abline(v=quantile(haps*100/N, 0.5), lty="dashed", col="red")
+mtext(paste0(format(quantile(haps*100/N, 0.5), digits=3), "%"), side=3, at=quantile(haps*100/N, 0.5), col="red")
+mtext(paste0(format(quantile(haps*100/N, 0.25), digits=3), "%"), side=3, at=quantile(haps*100/N, 0.25), col=rgb(1,0.5,0.5), adj=1)
+mtext(paste0(format(quantile(haps*100/N, 0.75), digits=3), "%"), side=3, at=quantile(haps*100/N, 0.75), col=rgb(1,0.5,0.5), adj=0)
+mtext(paste0(format(quantile(haps*100/N, 0.05), digits=3), "%"), side=3, at=quantile(haps*100/N, 0.05), col=rgb(1,0.85,0.85), adj=1)
+mtext(paste0(format(quantile(haps*100/N, 0.95), digits=3), "%"), side=3, at=quantile(haps*100/N, 0.95), col=rgb(1,0.85,0.85), adj=0)
+lines(hist)
+dev.off()
+
+# Supplementary Figure S5
+pdf(file=paste0(plotdir, "/SupplementaryFigureS5.pdf"), width=8, height=6)
 full.genotypes <- which(unlist(apply(individuals[,1:6], 1, function(x) { all((x %in% MHC_alleles) & !is.na(x)) })))
 counts <- sort(unlist(apply(individuals[full.genotypes,], 1, allele.data)), decreasing=TRUE)
 hist <- hist(counts*100/N, n=length(counts), plot=FALSE)
