@@ -327,11 +327,14 @@ SARS_CoV_2$Allele <- sub("HLA[-]([A-C]+)(.*)", "\\1*\\2", SARS_CoV_2$Allele)
 MHC_alleles <- unique(SARS_CoV_2$Allele)
 #N <- length(unique(SARS_CoV_2$Peptide))
 SARS_CoV_2 <- SARS_CoV_2[as.numeric(SARS_CoV_2$Binding_affinity) < 500,]
-N <- length(unique(SARS_CoV_2$Peptide))
+SARS_CoV_2.kmers <- unique(as.character(SARS_CoV_2$Peptide))
+N <- length(SARS_CoV_2.kmers)
 hash <- new.env(hash=TRUE)
 for (HLA in MHC_alleles) {
 	hash[[HLA]] <- as.character(SARS_CoV_2$Peptide[which(SARS_CoV_2$Allele==HLA)])
 }
+
+source("peptide_timing.R")
 
 # function to calculate number of unique peptides presented by a set of HLA alleles
 allele.data <- function(HLA=NULL) {
@@ -419,8 +422,8 @@ par(mar=c(3.1,0.1,2.1,0.1))
 HLAgeoPlot(c("A*02:06", "A*02:07", "B*08:01", "B*46:01", "C*12:03", "C*01:02"))
 dev.off()
 
-# Supplementary Figure S4
-pdf(file=paste0(plotdir, "/SupplementaryFigureS4.pdf"), width=8, height=6)
+# Supplementary Figure S5
+pdf(file=paste0(plotdir, "/SupplementaryFigureS5.pdf"), width=8, height=6)
 haps <- global_haplotype_freqs[which(global_haplotype_freqs[,"A"] %in% MHC_alleles & 
 		global_haplotype_freqs[,"B"] %in% MHC_alleles & 
 		global_haplotype_freqs[,"C"] %in% MHC_alleles),1:3] %>%
@@ -439,8 +442,8 @@ mtext(paste0(format(quantile(haps*100/N, 0.95), digits=3), "%"), side=3, at=quan
 lines(hist)
 dev.off()
 
-# Supplementary Figure S5
-pdf(file=paste0(plotdir, "/SupplementaryFigureS5.pdf"), width=8, height=6)
+# Supplementary Figure S6
+pdf(file=paste0(plotdir, "/SupplementaryFigureS6.pdf"), width=8, height=6)
 full.genotypes <- which(unlist(apply(individuals[,1:6], 1, function(x) { all((x %in% MHC_alleles) & !is.na(x)) })))
 counts <- sort(unlist(apply(individuals[full.genotypes,], 1, allele.data)), decreasing=TRUE)
 hist <- hist(counts*100/N, n=length(counts), plot=FALSE)
