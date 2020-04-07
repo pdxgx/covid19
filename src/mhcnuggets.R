@@ -65,7 +65,7 @@ a <- ggplot(covid_recode_nuggets, aes(x = allele, y = occ, fill = class, alpha =
   ggtitle("SARS-CoV-2 Presentation-Nuggets")+
   scale_y_discrete(expand=c(0,0))+
   scale_alpha(range = c(0.5, 1), guide = FALSE)+
-  theme(axis.ticks = element_line(size = .2), text = element_text(size=20), axis.text.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
+  theme(axis.ticks = element_line(size = .2), text = element_text(size=16), axis.text.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
 
 b <- ggplot(merged_allele_df, aes(x = reorder(allele,Freq), y = as.numeric(as.character(frequency)), fill = class))+
   geom_bar(position="stack", stat="identity")+
@@ -113,7 +113,7 @@ a <- ggplot(sars_recode_nuggets, aes(x = allele, y = occ, fill = class, alpha = 
   ggtitle("SARS-CoV Presentation-Nuggets")+
   scale_y_discrete(expand=c(0,0))+
   scale_alpha(range = c(0.5, 1), guide = FALSE)+
-  theme(axis.ticks = element_line(size = .2), text = element_text(size=20), axis.text.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
+  theme(axis.ticks = element_line(size = .2), text = element_text(size=17), axis.text.y=element_blank(), legend.key.size=unit(1,"cm"), panel.border=element_rect(colour="black", fill=NA, size=1))
 
 b <- ggplot(merged_allele_df, aes(x = reorder(allele,Freq), y = as.numeric(as.character(frequency)), fill = class))+
   geom_bar(position="stack", stat="identity")+
