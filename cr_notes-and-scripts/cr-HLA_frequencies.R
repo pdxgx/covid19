@@ -9,7 +9,9 @@
 require(rvest)
 require(rworldmap)
 require(dplyr) # for pipes
-require(textreadr) # for read_html
+
+# for Rscript call
+#require(textreadr) # for read_html (just Rscript call)
  
 alleles.outfile <- "HLA-freqs.rda"
 iso3.outfile <- "HLA-ISO3-freqs.rda"
@@ -24,7 +26,12 @@ plotdir <- "plots"
 #--------------------
 # get individual allele frequency data
 #--------------------
-alleles <- data.frame(HLA=character(), pop.ID=numeric(), pop.name=character(), freq=numeric(), sample.size=numeric())
+# cr: shortening line lengths
+# 
+
+alleles <- data.frame(HLA=character(), pop.ID=numeric(), 
+                      pop.name=character(), freq=numeric(), 
+                      sample.size=numeric())
 for (HLA in LETTERS[1:3]) {
 	page <- 1
 	while (page > 0) {
@@ -53,7 +60,12 @@ for (HLA in LETTERS[1:3]) {
     	data <- data %>% 
     		html_table() %>%
     		unlist(recursive=FALSE)
-    	alleles <- rbind(alleles, data.frame(HLA=data[[2]], pop.ID=popIDs, pop.name=data[[4]], freq=sub("[^0-9,.]+","",data[[6]]), sample.size=gsub(",","",data[[8]])))
+    	alleles <- rbind(alleles, 
+    	                 data.frame(HLA=data[[2]], 
+    	                            pop.ID=popIDs, 
+    	                            pop.name=data[[4]], 
+    	                            freq=sub("[^0-9,.]+","",data[[6]]), 
+    	                            sample.size=gsub(",","",data[[8]])))
     }
 	save(alleles,file=alleles.outfile)
 }

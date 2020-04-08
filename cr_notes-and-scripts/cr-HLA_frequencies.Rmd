@@ -10,11 +10,6 @@ knitr::opts_chunk$set(eval = TRUE, echo = TRUE,
 
 # Dependencies
 
-## Deps added
-
-1. dplyr
-2. textreadr
-
 # Deps validation
 
 ```{r}
@@ -23,6 +18,8 @@ require(rworldmap)
 require(dplyr) # for pipes
 require(textreadr) # for read_html
 ```
+
+
 
 # Function validation
 
