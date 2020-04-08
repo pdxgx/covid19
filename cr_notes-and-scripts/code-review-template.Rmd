@@ -14,6 +14,16 @@ The script comber can traverse the script and perform routine tasks.
 Code for review:
 
 ```{r}
-url <- "myurlstring"
-
+require(rvest)
+require(rworldmap)
+require(dplyr)
+HLA <- "A"
+page <- 0
+qurl <- paste0("http://www.allelefrequencies.net/hla6006a.asp?", 
+		               "hla_locus=", HLA, "&page=", page)
+data <- qurl %>%
+   			read_html()
+recs <- data %>%
+  html_nodes(xpath = '//*[@id="divGenNavig2"]/table') %>%
+  html_table()
 ```

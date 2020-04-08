@@ -1758,15 +1758,25 @@ summary {
 <p>Code for review:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXJsIDwtIFwibXl1cmxzdHJpbmdcIlxuXG5gYGAifQ== -->
-<pre class="r"><code>url &lt;- &quot;myurlstring&quot;
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZShydmVzdClcbnJlcXVpcmUocndvcmxkbWFwKVxucmVxdWlyZShkcGx5cilcbkhMQSA8LSBcIkFcIlxucGFnZSA8LSAwXG5xdXJsIDwtIHBhc3RlMChcImh0dHA6Ly93d3cuYWxsZWxlZnJlcXVlbmNpZXMubmV0L2hsYTYwMDZhLmFzcD9cIiwgXG5cdFx0ICAgICAgICAgICAgICAgXCJobGFfbG9jdXM9XCIsIEhMQSwgXCImcGFnZT1cIiwgcGFnZSlcbmRhdGEgPC0gcXVybCAlPiVcbiAgIFx0XHRcdHJlYWRfaHRtbCgpXG5yZWNzIDwtIGRhdGEgJT4lXG4gIGh0bWxfbm9kZXMoeHBhdGggPSAnLy8qW0BpZD1cImRpdkdlbk5hdmlnMlwiXS90YWJsZScpICU+JVxuICBodG1sX3RhYmxlKClcbmBgYCJ9 -->
+<pre class="r"><code>require(rvest)
+require(rworldmap)
+require(dplyr)
+HLA &lt;- &quot;A&quot;
+page &lt;- 0
+qurl &lt;- paste0(&quot;http://www.allelefrequencies.net/hla6006a.asp?&quot;, 
+                       &quot;hla_locus=&quot;, HLA, &quot;&amp;page=&quot;, page)
+data &lt;- qurl %&gt;%
+            read_html()
+recs &lt;- data %&gt;%
+  html_nodes(xpath = &#39;//*[@id=&quot;divGenNavig2&quot;]/table&#39;) %&gt;%
+  html_table()</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQ29kZSByZXZpZXcgdGVtcGxhdGUiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClRoaXMgaXMgYSB0ZW1wbGF0ZSBmb3IgcmV2aWV3aW5nIGNvZGUsIHByaW5jaXBseSB0byByZXByb2R1Y2UgZmluZGluZ3MsIGJ1dCBhbHNvIHRvIHN1Z2dlc3QgdW5pdCB0ZXN0cy4KCiMgU2NyaXB0IGNvbWJlcgoKVGhlIHNjcmlwdCBjb21iZXIgY2FuIHRyYXZlcnNlIHRoZSBzY3JpcHQgYW5kIHBlcmZvcm0gcm91dGluZSB0YXNrcy4KCiMjIEV4YW1wbGUKCkNvZGUgZm9yIHJldmlldzoKCmBgYHtyfQp1cmwgPC0gIm15dXJsc3RyaW5nIgoKYGBg</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQ29kZSByZXZpZXcgdGVtcGxhdGUiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClRoaXMgaXMgYSB0ZW1wbGF0ZSBmb3IgcmV2aWV3aW5nIGNvZGUsIHByaW5jaXBseSB0byByZXByb2R1Y2UgZmluZGluZ3MsIGJ1dCBhbHNvIHRvIHN1Z2dlc3QgdW5pdCB0ZXN0cy4KCiMgU2NyaXB0IGNvbWJlcgoKVGhlIHNjcmlwdCBjb21iZXIgY2FuIHRyYXZlcnNlIHRoZSBzY3JpcHQgYW5kIHBlcmZvcm0gcm91dGluZSB0YXNrcy4KCiMjIEV4YW1wbGUKCkNvZGUgZm9yIHJldmlldzoKCmBgYHtyfQpyZXF1aXJlKHJ2ZXN0KQpyZXF1aXJlKHJ3b3JsZG1hcCkKcmVxdWlyZShkcGx5cikKSExBIDwtICJBIgpwYWdlIDwtIDAKcXVybCA8LSBwYXN0ZTAoImh0dHA6Ly93d3cuYWxsZWxlZnJlcXVlbmNpZXMubmV0L2hsYTYwMDZhLmFzcD8iLCAKCQkgICAgICAgICAgICAgICAiaGxhX2xvY3VzPSIsIEhMQSwgIiZwYWdlPSIsIHBhZ2UpCmRhdGEgPC0gcXVybCAlPiUKICAgCQkJcmVhZF9odG1sKCkKcmVjcyA8LSBkYXRhICU+JQogIGh0bWxfbm9kZXMoeHBhdGggPSAnLy8qW0BpZD0iZGl2R2VuTmF2aWcyIl0vdGFibGUnKSAlPiUKICBodG1sX3RhYmxlKCkKYGBg</div>
 
 
 
