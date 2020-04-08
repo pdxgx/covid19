@@ -1,0 +1,19 @@
+---
+title: "Code review template"
+output: html_notebook
+---
+
+This is a template for reviewing code, principly to reproduce findings, but also to suggest unit tests.
+
+# Script comber
+
+The script comber can traverse the script and perform routine tasks.
+
+## Example
+
+Code for review:
+
+```{r}
+url <- "myurlstring"
+
+```

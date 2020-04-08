@@ -45,7 +45,9 @@ for (HLA in LETTERS[1:3]) {
 	  
 		qurl <- paste0("http://www.allelefrequencies.net/hla6006a.asp?", 
 		               "hla_locus=", HLA, "&page=", page)
-		# purpose: 
+		# purpose: url string 
+		# vars HLA and page
+		# length(qurl)
 		
  		data <- qurl %>%
    			read_html()
