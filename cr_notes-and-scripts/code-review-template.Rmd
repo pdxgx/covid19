@@ -27,18 +27,15 @@ returns standard loop details
 ```{r}
 # libstr <- "(library|require)&\\(&\\)"
 
-libstr <- "library|require"
-
+libstr1 <- ".*library.*|.*require.*"
+libstr2 <- "\\(.*"
+libstr3 <- "\\).*"
 
 str.exe <- "library(rworldmaps)"
-grepl("library\\(&\\)", str.exe, perl = TRUE)
 
-grepl(loadstr, "library(rworldmaps)")
-
-
-
-grepl("library|require", str.exe)
-grepl("\\(")
+grepl(libstr1, str.exe) &
+  grepl(libstr2, str.exe) &
+  grepl(libstr3, str.exe)
 
 ```
 
