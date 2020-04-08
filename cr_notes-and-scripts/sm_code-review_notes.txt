@@ -1,0 +1,12 @@
+Notes for code review
+
+General goals
+. is analysis reproducible?
+. is code organized?
+.. are dependencies clear
+
+# steps and findings for reproducing analysis
+
+
+# haplotype_count.R
+setwd("~/Documents/GitHub/covid19/cov")
