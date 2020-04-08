@@ -19,6 +19,17 @@ On loop recognition, script will take "first" instance
 returns standard loop details
 `nchar()`, 
 
+## recognition of dependencies
+
+```{r}
+# libstr <- "(library|require)&\\(&\\)"
+
+libstr <- 
+
+grepl(loadstr, "library(rworldmaps)")
+
+```
+
 ## recognition of loops
 
 ```{r}
@@ -27,9 +38,13 @@ grepl("(for|which|while|else)", loopstr) &
 grepl("\\(|\\)", loopstr) &
 grepl("\\{|\\}", loopstr)
 
-rec.loops <- function(statement = "(for|which|while|else)",
+rec.loops <- function(line, statement = "(for|which|while|else)",
                       parenth = "\\(|\\)", braces = "\\{|\\}"){
-  
+  # line : input line
+  # statement : pattern match func statement
+  # parenth : parentheses rec
+  # braces : braces rec
+  return()
 }
 
 ```
