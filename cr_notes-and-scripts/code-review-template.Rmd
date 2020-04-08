@@ -9,6 +9,32 @@ This is a template for reviewing code, principly to reproduce findings, but also
 
 The script comber can traverse the script and perform routine tasks.
 
+
+Starts with `Sys.info()`
+Runs header and gets `Sys.info()` diffs
+
+script comber reads script in, line-by-line
+`readLine()`
+On loop recognition, script will take "first" instance
+returns standard loop details
+`nchar()`, 
+
+## recognition of loops
+
+```{r}
+loopstr <- "for (HLA in LETTERS[1:3]){"
+grepl("(for|which|while|else)", loopstr) &
+grepl("\\(|\\)", loopstr) &
+grepl("\\{|\\}", loopstr)
+
+rec.loops <- function(statement = "(for|which|while|else)",
+                      parenth = "\\(|\\)", braces = "\\{|\\}"){
+  
+}
+
+```
+
+
 ## Example
 
 Code for review:
@@ -17,13 +43,20 @@ Code for review:
 require(rvest)
 require(rworldmap)
 require(dplyr)
-HLA <- "A"
-page <- 0
-qurl <- paste0("http://www.allelefrequencies.net/hla6006a.asp?", 
+for (HLA in LETTERS[1:3]){
+  page <- 0
+  while (page > 0) {
+    qurl <- paste0("http://www.allelefrequencies.net/hla6006a.asp?", 
 		               "hla_locus=", HLA, "&page=", page)
-data <- qurl %>%
-   			read_html()
-recs <- data %>%
-  html_nodes(xpath = '//*[@id="divGenNavig2"]/table') %>%
-  html_table()
+    data <- qurl %>% read_html()
+    recs <- data %>%
+      html_nodes(xpath = '//*[@id="divGenNavig2"]/table') %>%
+      html_table()
+  }
+}
+
 ```
+
+
+
+

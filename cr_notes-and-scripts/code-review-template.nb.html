@@ -1753,30 +1753,56 @@ summary {
 <div id="script-comber" class="section level1">
 <h1>Script comber</h1>
 <p>The script comber can traverse the script and perform routine tasks.</p>
+<p>Starts with <code>Sys.info()</code> Runs header and gets <code>Sys.info()</code> diffs</p>
+<p>script comber reads script in, line-by-line <code>readLine()</code> On loop recognition, script will take “first” instance returns standard loop details <code>nchar()</code>,</p>
+<div id="recognition-of-loops" class="section level2">
+<h2>recognition of loops</h2>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubG9vcHN0ciA8LSBcImZvciAoSExBIGluIExFVFRFUlNbMTozXSl7XCJcbmdyZXBsKFwiKGZvcnx3aGljaHx3aGlsZXxlbHNlKVwiLCBsb29wc3RyKSAmXG5ncmVwbChcIlxcXFwofFxcXFwpXCIsIGxvb3BzdHIpICZcbmdyZXBsKFwiXFxcXHt8XFxcXH1cIiwgbG9vcHN0cilcblxucmVjLmxvb3BzIDwtIGZ1bmN0aW9uKHN0YXRlbWVudCA9IFwiKGZvcnx3aGljaHx3aGlsZXxlbHNlKVwiLFxuICAgICAgICAgICAgICAgICAgICAgIHBhcmVudGggPSBcIlxcXFwofFxcXFwpXCIsIGJyYWNlcyA9IFwiXFxcXHt8XFxcXH1cIil7XG4gIFxufVxuXG5gYGAifQ== -->
+<pre class="r"><code>loopstr &lt;- &quot;for (HLA in LETTERS[1:3]){&quot;
+grepl(&quot;(for|which|while|else)&quot;, loopstr) &amp;
+grepl(&quot;\\(|\\)&quot;, loopstr) &amp;
+grepl(&quot;\\{|\\}&quot;, loopstr)
+
+rec.loops &lt;- function(statement = &quot;(for|which|while|else)&quot;,
+                      parenth = &quot;\\(|\\)&quot;, braces = &quot;\\{|\\}&quot;){
+  
+}
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
 <div id="example" class="section level2">
 <h2>Example</h2>
 <p>Code for review:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZShydmVzdClcbnJlcXVpcmUocndvcmxkbWFwKVxucmVxdWlyZShkcGx5cilcbkhMQSA8LSBcIkFcIlxucGFnZSA8LSAwXG5xdXJsIDwtIHBhc3RlMChcImh0dHA6Ly93d3cuYWxsZWxlZnJlcXVlbmNpZXMubmV0L2hsYTYwMDZhLmFzcD9cIiwgXG5cdFx0ICAgICAgICAgICAgICAgXCJobGFfbG9jdXM9XCIsIEhMQSwgXCImcGFnZT1cIiwgcGFnZSlcbmRhdGEgPC0gcXVybCAlPiVcbiAgIFx0XHRcdHJlYWRfaHRtbCgpXG5yZWNzIDwtIGRhdGEgJT4lXG4gIGh0bWxfbm9kZXMoeHBhdGggPSAnLy8qW0BpZD1cImRpdkdlbk5hdmlnMlwiXS90YWJsZScpICU+JVxuICBodG1sX3RhYmxlKClcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZShydmVzdClcbnJlcXVpcmUocndvcmxkbWFwKVxucmVxdWlyZShkcGx5cilcbmZvciAoSExBIGluIExFVFRFUlNbMTozXSl7XG4gIHBhZ2UgPC0gMFxuICB3aGlsZSAocGFnZSA+IDApIHtcbiAgICBxdXJsIDwtIHBhc3RlMChcImh0dHA6Ly93d3cuYWxsZWxlZnJlcXVlbmNpZXMubmV0L2hsYTYwMDZhLmFzcD9cIiwgXG5cdFx0ICAgICAgICAgICAgICAgXCJobGFfbG9jdXM9XCIsIEhMQSwgXCImcGFnZT1cIiwgcGFnZSlcbiAgICBkYXRhIDwtIHF1cmwgJT4lIHJlYWRfaHRtbCgpXG4gICAgcmVjcyA8LSBkYXRhICU+JVxuICAgICAgaHRtbF9ub2Rlcyh4cGF0aCA9ICcvLypbQGlkPVwiZGl2R2VuTmF2aWcyXCJdL3RhYmxlJykgJT4lXG4gICAgICBodG1sX3RhYmxlKClcbiAgfVxufVxuXG5gYGAifQ== -->
 <pre class="r"><code>require(rvest)
 require(rworldmap)
 require(dplyr)
-HLA &lt;- &quot;A&quot;
-page &lt;- 0
-qurl &lt;- paste0(&quot;http://www.allelefrequencies.net/hla6006a.asp?&quot;, 
+for (HLA in LETTERS[1:3]){
+  page &lt;- 0
+  while (page &gt; 0) {
+    qurl &lt;- paste0(&quot;http://www.allelefrequencies.net/hla6006a.asp?&quot;, 
                        &quot;hla_locus=&quot;, HLA, &quot;&amp;page=&quot;, page)
-data &lt;- qurl %&gt;%
-            read_html()
-recs &lt;- data %&gt;%
-  html_nodes(xpath = &#39;//*[@id=&quot;divGenNavig2&quot;]/table&#39;) %&gt;%
-  html_table()</code></pre>
+    data &lt;- qurl %&gt;% read_html()
+    recs &lt;- data %&gt;%
+      html_nodes(xpath = &#39;//*[@id=&quot;divGenNavig2&quot;]/table&#39;) %&gt;%
+      html_table()
+  }
+}
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQ29kZSByZXZpZXcgdGVtcGxhdGUiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClRoaXMgaXMgYSB0ZW1wbGF0ZSBmb3IgcmV2aWV3aW5nIGNvZGUsIHByaW5jaXBseSB0byByZXByb2R1Y2UgZmluZGluZ3MsIGJ1dCBhbHNvIHRvIHN1Z2dlc3QgdW5pdCB0ZXN0cy4KCiMgU2NyaXB0IGNvbWJlcgoKVGhlIHNjcmlwdCBjb21iZXIgY2FuIHRyYXZlcnNlIHRoZSBzY3JpcHQgYW5kIHBlcmZvcm0gcm91dGluZSB0YXNrcy4KCiMjIEV4YW1wbGUKCkNvZGUgZm9yIHJldmlldzoKCmBgYHtyfQpyZXF1aXJlKHJ2ZXN0KQpyZXF1aXJlKHJ3b3JsZG1hcCkKcmVxdWlyZShkcGx5cikKSExBIDwtICJBIgpwYWdlIDwtIDAKcXVybCA8LSBwYXN0ZTAoImh0dHA6Ly93d3cuYWxsZWxlZnJlcXVlbmNpZXMubmV0L2hsYTYwMDZhLmFzcD8iLCAKCQkgICAgICAgICAgICAgICAiaGxhX2xvY3VzPSIsIEhMQSwgIiZwYWdlPSIsIHBhZ2UpCmRhdGEgPC0gcXVybCAlPiUKICAgCQkJcmVhZF9odG1sKCkKcmVjcyA8LSBkYXRhICU+JQogIGh0bWxfbm9kZXMoeHBhdGggPSAnLy8qW0BpZD0iZGl2R2VuTmF2aWcyIl0vdGFibGUnKSAlPiUKICBodG1sX3RhYmxlKCkKYGBg</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQ29kZSByZXZpZXcgdGVtcGxhdGUiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClRoaXMgaXMgYSB0ZW1wbGF0ZSBmb3IgcmV2aWV3aW5nIGNvZGUsIHByaW5jaXBseSB0byByZXByb2R1Y2UgZmluZGluZ3MsIGJ1dCBhbHNvIHRvIHN1Z2dlc3QgdW5pdCB0ZXN0cy4KCiMgU2NyaXB0IGNvbWJlcgoKVGhlIHNjcmlwdCBjb21iZXIgY2FuIHRyYXZlcnNlIHRoZSBzY3JpcHQgYW5kIHBlcmZvcm0gcm91dGluZSB0YXNrcy4KCgpTdGFydHMgd2l0aCBgU3lzLmluZm8oKWAKUnVucyBoZWFkZXIgYW5kIGdldHMgYFN5cy5pbmZvKClgIGRpZmZzCgpzY3JpcHQgY29tYmVyIHJlYWRzIHNjcmlwdCBpbiwgbGluZS1ieS1saW5lCmByZWFkTGluZSgpYApPbiBsb29wIHJlY29nbml0aW9uLCBzY3JpcHQgd2lsbCB0YWtlICJmaXJzdCIgaW5zdGFuY2UKcmV0dXJucyBzdGFuZGFyZCBsb29wIGRldGFpbHMKYG5jaGFyKClgLCAKCiMjIHJlY29nbml0aW9uIG9mIGxvb3BzCgpgYGB7cn0KbG9vcHN0ciA8LSAiZm9yIChITEEgaW4gTEVUVEVSU1sxOjNdKXsiCmdyZXBsKCIoZm9yfHdoaWNofHdoaWxlfGVsc2UpIiwgbG9vcHN0cikgJgpncmVwbCgiXFwofFxcKSIsIGxvb3BzdHIpICYKZ3JlcGwoIlxce3xcXH0iLCBsb29wc3RyKQoKcmVjLmxvb3BzIDwtIGZ1bmN0aW9uKHN0YXRlbWVudCA9ICIoZm9yfHdoaWNofHdoaWxlfGVsc2UpIiwKICAgICAgICAgICAgICAgICAgICAgIHBhcmVudGggPSAiXFwofFxcKSIsIGJyYWNlcyA9ICJcXHt8XFx9Iil7CiAgCn0KCmBgYAoKCiMjIEV4YW1wbGUKCkNvZGUgZm9yIHJldmlldzoKCmBgYHtyfQpyZXF1aXJlKHJ2ZXN0KQpyZXF1aXJlKHJ3b3JsZG1hcCkKcmVxdWlyZShkcGx5cikKZm9yIChITEEgaW4gTEVUVEVSU1sxOjNdKXsKICBwYWdlIDwtIDAKICB3aGlsZSAocGFnZSA+IDApIHsKICAgIHF1cmwgPC0gcGFzdGUwKCJodHRwOi8vd3d3LmFsbGVsZWZyZXF1ZW5jaWVzLm5ldC9obGE2MDA2YS5hc3A/IiwgCgkJICAgICAgICAgICAgICAgImhsYV9sb2N1cz0iLCBITEEsICImcGFnZT0iLCBwYWdlKQogICAgZGF0YSA8LSBxdXJsICU+JSByZWFkX2h0bWwoKQogICAgcmVjcyA8LSBkYXRhICU+JQogICAgICBodG1sX25vZGVzKHhwYXRoID0gJy8vKltAaWQ9ImRpdkdlbk5hdmlnMiJdL3RhYmxlJykgJT4lCiAgICAgIGh0bWxfdGFibGUoKQogIH0KfQoKYGBgCgoKCgo=</div>
 
 
 
