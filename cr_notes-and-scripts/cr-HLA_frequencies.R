@@ -33,22 +33,44 @@ alleles <- data.frame(HLA=character(), pop.ID=numeric(),
                       pop.name=character(), freq=numeric(), 
                       sample.size=numeric())
 for (HLA in LETTERS[1:3]) {
-	page <- 1
+  # cr comments 
+  # >HLA = "A"
+  
+	page <- 1 
+	
+	# while loop tracks page num
 	while (page > 0) {
 		print(paste0("HLA-",HLA," (page ",page,")"))
-		qurl <- paste0("http://www.allelefrequencies.net/hla6006a.asp?", "hla_locus=", HLA, "&page=", page)
+	  # purpose : status of process printed to console
+	  
+		qurl <- paste0("http://www.allelefrequencies.net/hla6006a.asp?", 
+		               "hla_locus=", HLA, "&page=", page)
+		# purpose: 
+		
  		data <- qurl %>%
    			read_html()
    		recs <- data %>%
    			html_nodes(xpath = '//*[@id="divGenNavig2"]/table') %>%
    			html_table()
-   		recs <- recs[[1]][1]
+   		# 
+   		
+   		# class(data) # "xml_document" "xml_node
+   		
+   		recs <- recs[[1]][1] # data.frame class
+   		
    		if (sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\1", recs) ==
-   			sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\2", recs)) {
-   			page <- 0
+   		    sub(".*to ([0-9,]+)[^0-9]*[(]from (.*)[)].*", "\\2", recs)) {
+   		  page <- 0
    		} else {
-   			page <- page + 1
+   		  page <- page + 1
    		}
+   		# purpose: track page num
+   		# sub replaces regex pattern match in recs
+   		# >recs # returns:
+   		# X1
+   		# 1 Displaying 1 to 100\r\n\t\t    (from 27,852) records
+   		
+   		
 		data <- data %>%
   			html_nodes(xpath = '//*[@id="divGenDetail"]/table') 
     	popIDs <- data %>% 
@@ -66,6 +88,16 @@ for (HLA in LETTERS[1:3]) {
     	                            pop.name=data[[4]], 
     	                            freq=sub("[^0-9,.]+","",data[[6]]), 
     	                            sample.size=gsub(",","",data[[8]])))
+    	# 
+    	
+    	
+    	# >class(data) # list
+    	# >length(data) # 12
+    	# length(data[[2]]) # 100
+    	# length(data[[length(data)]]) # 100
+    	# >data[[1]] # lists numeric vector
+    	# class(data[[1]]) # [1] "integer"
+    	
     }
 	save(alleles,file=alleles.outfile)
 }
