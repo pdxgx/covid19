@@ -1,0 +1,45 @@
+---
+title: "Code review: reproducing results in HLA_frequencies.R"
+output: html_notebook
+---
+
+```{r setup}
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE, 
+                      warning = TRUE, message = FALSE)
+```
+
+# Dependencies
+
+## Deps added
+
+1. dplyr
+2. textreadr
+
+# Deps validation
+
+```{r}
+require(rvest)
+require(rworldmap)
+require(dplyr) # for pipes
+require(textreadr) # for read_html
+```
+
+# Function validation
+
+# Script validation
+
+# section: get individual allele frequency data
+
+```{r}
+alleles <- data.frame(HLA=character(), pop.ID=numeric(), pop.name=character(), freq=numeric(), sample.size=numeric())
+```
+
+# Sys.info
+
+```{r}
+Sys.info()
+```
+
+# Rscript run
+
+Results from running with `Rscript <path-to-script>` from command line.
