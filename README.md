@@ -1,5 +1,8 @@
 # covid19
 
+[Read our paper in Journal of Virology](https://dx.doi.org/10.1128/JVI.00510-20)
+
+
 ## Software requirements
 
 *R and R packages*
@@ -72,4 +75,19 @@ We designed and executed a custom `R` script (`HLA_frequencies.R`) to scrape all
 *Protein sequence alignments*
 
 For each protein class (i.e. ORF1ab, S, M, E, N), all 34 coronavirus sequences were aligned using the web-based [`Clustal Omega`](https://www.ebi.ac.uk/Tools/msa/clustalo/) multisequence aligner tool employing default parameters: sequence type [Protein], output alignment format [clustal_num], dealign [false], mBed-like clustering guide-tree [true], mBed-like clustering iteration [true], number of combined iterations [0], maximum guide tree iterations [-1], and maximum HMM iterations [-1].
+
+*Binding affinity*
+
+Using the above FASTA sequences, we used netchop v3.0 "C-term" model with a cleavage threshold of 0.1 to filter peptides that were not predicted to undergo canonical MHC class I antigen processing via proteasomal cleavage.
+
+To assess binding affinity, we kmerized the protein FASTA into peptides of length 8-12.
+``` sed 's/>.*/|/g' protein_sequence.fasta > protein_sequence_with_pipe.fasta ```
+``` perl -pe 's/\s+//g' protein_sequence_with_pipe.fasta > protein_no_space.fasta ```
+
+From the netchop v3.0 output, we further processed the file to get rid of NA lines and added row numbers as a column.
+``` sed '/NA/d' netchop_out.txt > netchop_out_parsed.txt ``` 
+``` awk -F'\t' 'NR>1{$0=$0"\t"NR-1} 1' netchop_out_parsed.txt > netchop_numbered.txt ```
+
+
+
 
