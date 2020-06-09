@@ -81,13 +81,21 @@ For each protein class (i.e. ORF1ab, S, M, E, N), all 34 coronavirus sequences w
 Using the above FASTA sequences, we used netchop v3.0 "C-term" model with a cleavage threshold of 0.1 to filter peptides that were not predicted to undergo canonical MHC class I antigen processing via proteasomal cleavage.
 
 To assess binding affinity, we kmerized the protein FASTA into peptides of length 8-12.
+
 ``` sed 's/>.*/|/g' protein_sequence.fasta > protein_sequence_with_pipe.fasta ```
 ``` perl -pe 's/\s+//g' protein_sequence_with_pipe.fasta > protein_no_space.fasta ```
 
 From the netchop v3.0 output, we further processed the file to get rid of NA lines and added row numbers as a column.
+
 ``` sed '/NA/d' netchop_out.txt > netchop_out_parsed.txt ``` 
 ``` awk -F'\t' 'NR>1{$0=$0"\t"NR-1} 1' netchop_out_parsed.txt > netchop_numbered.txt ```
 
+Using these 2 files, we ran a custom python script (`faster_kmer.py`) to generate a list of peptides.
+
+``` python3 faster_kmer.py > output.pep ```
+``` sed '/|/d' output.pep > output_filt.pep ```
+
+Binding affinity of these peptides were calculated using netMHCpan v4.0 (73) with the ‘-BA’ option to include binding affinity predictions and the ‘-l’ option to specify peptides of lengths 8-12.
 
 
 
