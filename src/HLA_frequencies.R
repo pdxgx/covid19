@@ -223,7 +223,7 @@ for (ISO3 in unique(alleles[,"country"])) {
 		hla.data <- data[grepl(HLA,data[,"HLA"], fixed=TRUE),c("freq","sample.size")]
 		# alternative approach is to only lump by exact allele match
 		# hla.data <- data[which(data[,"HLA"]==HLA),c("freq","sample.size")]
-		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2]), popsize=popsize)))
+		hla.iso3 <- rbind(hla.iso3, data.frame(ISO3=ISO3, HLA=HLA, freq=weighted.mean(as.numeric(hla.data[,1]), w=as.numeric(hla.data[,2])), popsize=popsize))
 	}
 }
 save(hla.iso3,file=iso3.outfile)
