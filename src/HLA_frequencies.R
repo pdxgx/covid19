@@ -253,6 +253,16 @@ for (ISO3 in unique(alleles[,"country"])) {
 		# Canada HLA data only available for BC First Nations (Athabaskan and Penutian)
 		# Canada First Nations are ~4% of national population 
 		CAN = 32243.753 * 0.04,
+		    COK = 152,
+                    KIR = 116,
+                    NRU = 127,
+                    NIU = 16,
+                    WSM = 196,
+                    TKL = 14,
+                    TON = 103,
+                    GMB = 2280,
+                    LBR = 4819,
+                    BOR = 21258, #https://en.wikipedia.org/wiki/Borneo
 		countries[which(countries[,1]==ISO3),"Population2005"]
 	)
 	haps <- haplotypes[which(haplotypes[,"pop.ID"] %in% data[,"pop.ID"]),]
